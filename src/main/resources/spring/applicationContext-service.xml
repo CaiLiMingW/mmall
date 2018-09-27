@@ -7,7 +7,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 	<!-- 只扫描service包 -->
-	<context:component-scan base-package="org.clm.Service.impl" >
+	<context:component-scan base-package="org.clm.Service.Impl" >
 		<!--<context:include-filter type="annotation"   use-default-filters="false"
 								expression="org.springframework.stereotype.Service"/>-->
 	</context:component-scan>
@@ -16,7 +16,8 @@
 	<!-- ===============事务控制的配置 ================-->
 	<bean id="tx" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<!--控制住数据源  -->
-		<property name="dataSource" ref="dataSource"></property>
+		<property name="dataSource" ref="dataSource"/>
+		<property name="rollbackOnCommitFailure" value="true"/>
 	</bean>
 	<!-- 事务采用全注解方式 -->
 	<tx:annotation-driven transaction-manager="tx" />

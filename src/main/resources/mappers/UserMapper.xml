@@ -24,6 +24,26 @@
     from mmall_user
     where id = #{id,jdbcType=INTEGER}
   </select>
+  <select id="checkUsername" resultType="java.lang.Integer" parameterType="string">
+    select count(1)
+    form mmall_user
+    where username = #{username}
+    and password = #{password}
+  </select>
+  <select id="selectLogin" resultType="org.clm.Pojo.User" parameterType="map">
+    select
+    <include refid="Base_Column_List"/>
+    from mmall_user
+    where
+    username = #{username}
+    password = #{password}
+  </select>
+  <select id="checkEmail" resultType="java.lang.Integer" parameterType="string">
+    select count(1)
+    from mmall_user
+    where
+    email = #{email}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_user
     where id = #{id,jdbcType=INTEGER}
