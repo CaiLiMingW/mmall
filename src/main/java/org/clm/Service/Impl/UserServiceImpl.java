@@ -6,8 +6,12 @@ import org.clm.Pojo.User;
 import org.clm.Service.IUserService;
 import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
+import org.clm.common.TokenCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.security.util.Password;
+
+import java.util.UUID;
 
 /**
  * @author Ccc
@@ -92,5 +96,99 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByErrorMessage("参数错误");
         }
         return ServiceResponse.createBySuccessMessage("校验成功");
+    }
+
+    /**
+     * 查找账号提示问题
+     * @param username
+     * @return
+     */
+    @Override
+    public ServiceResponse<String> selectQuestion(String username){
+        /**验证用户是否存在*/
+        ServiceResponse response = this.checkValid(username, Const.USERNAME);
+        /**如果该用户存在*/
+        if(!response.isSuccess()){
+            /**查询该用户的提示问题*/
+            String question = userMapper.selectQuestionByUsername(username);
+            /**如果该用户的问题不为空,返回question*/
+            if(StringUtils.isNotBlank(question)){
+                return ServiceResponse.createBySucces(question);
+            }
+            /**问题为空返回错误信息错误信息*/
+            return ServiceResponse.createByErrorMessage("该用户问题未设置");
+        }
+        /**用户不存在返回错误信息*/
+        return ServiceResponse.createBySuccessMessage("用户名不存在");
+    }
+
+    /**
+     * 验证用户的问题和答案
+     * @param username
+     * @param question
+     * @param answer
+     * @return
+     */
+    @Override
+    public ServiceResponse<String> checkAnswer(String username,String question,String answer){
+        int resultCount = userMapper.checkAnswer(username,question,answer);
+        if(resultCount > 0){
+            /**说明该用户问题答案正确*/
+            String forgetToken = UUID.randomUUID().toString();
+            TokenCache.setkey("token_"+username,forgetToken);
+            return ServiceResponse.createBySucces(forgetToken);
+        }
+        return ServiceResponse.createByErrorMessage("答案错误");
+    }
+
+    @Override
+    public ServiceResponse<String> forgetrestPassword(String username,String passwordNew,String fotgetToken){
+        if(StringUtils.isNotBlank(fotgetToken)){
+            return ServiceResponse.createByErrorMessage("参数错误，token需要传递");
+        }
+        String token = TokenCache.getkey("token"+username);
+        if(StringUtils.isNotBlank(token)){
+            return ServiceResponse.createByErrorMessage("请求已超时");
+        }
+        if(StringUtils.equals(token,fotgetToken)){
+            int i = userMapper.updatePasswordByusername(username, passwordNew);
+        }else {
+            return ServiceResponse.createByErrorMessage("token错误,请重新进行修改");
+        }
+        return ServiceResponse.createBySuccessMessage("修改密码成功");
+    }
+
+    @Override
+    public ServiceResponse<String> restPassword(String passwordOld, String passwordNew, User user){
+        /**防止横向越权,校验旧密码是否正常*/
+        int resultCount = userMapper.checkPassword(passwordOld, user.getId());
+        if (resultCount == 0){
+            return ServiceResponse.createByErrorMessage("旧密码错误");
+        }
+        int i = userMapper.updatePasswordByusername(user.getUsername(), passwordNew);
+       /* if(i>0){*/
+            user.setPassword(passwordNew);
+            return ServiceResponse.createBySuccessMessage("修改成功");
+       /* }
+        return ServiceResponse.createByErrorMessage("修改失败");*/
+    }
+
+    @Override
+    public ServiceResponse<User> updateInfomation(User user) {
+        //检查邮箱是否被使用
+        int resultCount = userMapper.checkEmailByUserId(user.getEmail(), user.getId());
+        if(resultCount>0){
+            return ServiceResponse.createByErrorMessage("邮箱已存在");
+        }
+        /**只修改以下内容,防止越权修改*/
+        User updateuser = new User();
+        updateuser.setEmail(user.getEmail());
+        updateuser.setQuestion(user.getQuestion());
+        updateuser.setAnswer(user.getAnswer());
+        updateuser.setPhone(user.getPhone());
+
+        resultCount = userMapper.updateByPrimaryKeySelective(updateuser);
+
+        return ServiceResponse.createBySuccess("修改成功",user);
     }
 }

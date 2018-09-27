@@ -1,13 +1,13 @@
 package org.clm.common;
 
-/**
+/** 枚举类
  * @author Ccc
  * @date 2018/9/27 0027 上午 8:47
  */
 public enum ResponseCode {
     SUCCESS(0,"SUCCESS"),
     ERROR(1,"ERROR"),
-    NEED_LOGIN(2,"NEED_LOGIN"),
+    NEED_LOGIN(10,"NEED_LOGIN"),
     ILLEGAL_ARGUMENT(3,"ILLEGAL_ARGUMENT")
     ;
     private final int code;

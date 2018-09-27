@@ -1,6 +1,6 @@
 package org.clm.common;
 
-/**
+/** 常态常量
  * @author Ccc
  * @date 2018/9/27 0027 上午 10:34
  */
