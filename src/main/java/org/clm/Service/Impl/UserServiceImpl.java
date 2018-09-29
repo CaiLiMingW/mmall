@@ -1,16 +1,20 @@
 package org.clm.Service.Impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.clm.Dao.CategoryMapper;
 import org.clm.Dao.UserMapper;
 import org.clm.Pojo.User;
 import org.clm.Service.IUserService;
 import org.clm.common.Const;
+import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
 import org.clm.common.TokenCache;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import sun.security.util.Password;
 
+import javax.servlet.http.HttpSession;
 import java.util.UUID;
 
 /**
@@ -191,4 +195,33 @@ public class UserServiceImpl implements IUserService {
 
         return ServiceResponse.createBySuccess("修改成功",user);
     }
+
+    @Override
+    public ServiceResponse<User> getInfomation(Integer id){
+        User user = userMapper.selectByPrimaryKey(id);
+        if (user == null){
+            return ServiceResponse.createByErrorMessage("用户不存在");
+        }
+        return ServiceResponse.createBySucces(user);
+    }
+
+    @Override
+    public ServiceResponse checkAdminRole(HttpSession session){
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if(user==null){
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"用户未登录");
+        }
+        User user1 = userMapper.selectByPrimaryKey(user.getId());
+
+        if (user1==null){
+            ServiceResponse.createByErrorMessage("用户不存在");
+        }
+
+        if(user.getRole()== Const.Role.ROLE_ADMIN){
+            return ServiceResponse.createBySuccess();
+        }
+        return ServiceResponse.createByErrorMessage("没有权限");
+    }
+
+
 }

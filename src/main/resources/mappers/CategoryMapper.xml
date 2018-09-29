@@ -19,7 +19,12 @@
     select 
     <include refid="Base_Column_List" />
     from mmall_category
-    where id = #{id,jdbcType=INTEGER}
+    where parent_id = #{parentId,jdbcType=INTEGER}
+  </select>
+  <select id="checkId" resultType="java.lang.Integer" parameterType="integer">
+    select count(1)
+    from mmall_category
+    where parent_id = #{parentId}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_category

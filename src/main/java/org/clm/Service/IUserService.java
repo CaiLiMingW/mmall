@@ -3,6 +3,8 @@ package org.clm.Service;
 import org.clm.Pojo.User;
 import org.clm.common.ServiceResponse;
 
+import javax.servlet.http.HttpSession;
+
 /**
  * @author Ccc
  * @date 2018/9/27 0027 上午 8:36
@@ -24,4 +26,7 @@ public interface IUserService {
 
     ServiceResponse<User> updateInfomation(User user);
 
+    ServiceResponse<User> getInfomation(Integer id);
+
+    ServiceResponse checkAdminRole(HttpSession session);
 }

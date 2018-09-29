@@ -19,7 +19,7 @@
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>classpath:spring/applicationContext-web.xml</param-value>
+            <param-value>classpath:spring/spring-context-web.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -48,6 +48,15 @@
         <filter-name>CharacterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    <!--<filter>
+        <filter-name>shiroFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    &lt;!&ndash;shiro拦截器&ndash;&gt;
+    <filter-mapping>
+        <filter-name>shiroFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
     <!--文件上传解析 需放在HiddenHttpMethodFilter 前
         PUT方式无法传递jsp格式 可用重定向跳转页面
     -->

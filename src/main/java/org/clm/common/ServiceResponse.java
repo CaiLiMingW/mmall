@@ -1,7 +1,8 @@
 package org.clm.common;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.io.Serializable;
 
@@ -10,8 +11,10 @@ import java.io.Serializable;
  * @date 2018/9/27 0027 上午 8:38
  *
  * @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+ * @JsonInclude(JsonInclude.Include.NON_NULL)
  * 序列化json时,Null的对象，Key也会消失
  */
+
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class ServiceResponse<T> implements Serializable {
 
@@ -42,8 +45,9 @@ public class ServiceResponse<T> implements Serializable {
         this.status = status;
         this.msg = msg;
     }
+
+    /**不在Json序列化结果当中 @JsonIgnore*/
     @JsonIgnore
-    /**不在Json序列化结果当中*/
     public boolean isSuccess(){
         return this.status==ResponseCode.SUCCESS.getCode();
     }
@@ -85,7 +89,7 @@ public class ServiceResponse<T> implements Serializable {
         return new ServiceResponse<T>(ResponseCode.ERROR.getCode(),errorMessage);
     }
     /**创建ServiceResponse设置data信息和msg*/
-    public static <T> ServiceResponse<T> createByError(int status,String errorMessage){
+    public static <T> ServiceResponse<T> createByCodeError(int status,String errorMessage){
         return new ServiceResponse<T>(status,errorMessage);
     }
 }
