@@ -41,11 +41,11 @@
 		<property name="basePackage" value="org.clm.Dao"/>
 	</bean>
 	
-	<!-- 配置一个可以执行批量的sqlSession -->
+	<!--&lt;!&ndash; 配置一个可以执行批量的sqlSession &ndash;&gt;
 	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
 		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
 		<constructor-arg name="executorType" value="BATCH"/>
 	</bean>
-
+-->
 
 </beans>

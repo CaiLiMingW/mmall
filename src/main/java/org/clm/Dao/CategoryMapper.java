@@ -11,6 +11,8 @@ public interface CategoryMapper {
 
     int insertSelective(Category record);
 
+    Category selectById(Integer id);
+
     List<Category> selectByPrimaryKey(Integer parentId);
 
     int updateByPrimaryKeySelective(Category record);

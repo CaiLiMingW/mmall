@@ -47,8 +47,11 @@ public class ICategoryManageServiceImpl implements ICategoryManageService {
         category.setStatus(true);
 
         int rowCount = categoryMapper.insertSelective(category);
+        if(rowCount>0){
+            return ServiceResponse.createBySuccessMessage("添加品类成功");
+        }
+        return ServiceResponse.createByErrorMessage("添加品类失败");
 
-        return ServiceResponse.createBySuccessMessage("添加品类成功");
 
     }
 
@@ -61,8 +64,10 @@ public class ICategoryManageServiceImpl implements ICategoryManageService {
         category.setName(categoryName);
         category.setId(categoryId);
         int i = categoryMapper.updateByPrimaryKeySelective(category);
-        System.out.println(i);
-        return ServiceResponse.createBySuccessMessage("更新品类名字成功");
+        if(i>0){
+            return ServiceResponse.createBySuccessMessage("更新品类名字成功");
+        }
+        return ServiceResponse.createByErrorMessage("更新品类失败");
     }
 
     @Override

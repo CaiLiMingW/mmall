@@ -18,14 +18,35 @@
     </constructor>
   </resultMap>
   <sql id="Base_Column_List" >
-    id, category_id, name, subtitle, main_image, sub_images, detail, price, stock, status, 
+    id, category_id, name, subtitle, main_image, sub_images, detail, price, stock, status,
     create_time, update_time
+  </sql>
+  <sql id="View">
+  id, category_id, name, subtitle,main_image,price,status
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
     <include refid="Base_Column_List" />
     from mmall_product
-    where id = #{id,jdbcType=INTEGER}
+    where id = #{productId,jdbcType=INTEGER}
+  </select>
+    <select id="selectAllProduct" resultType="Product">
+      select
+      <include refid="View"/>
+      from mmall_product
+    </select>
+  <select id="selectByIdAndName" resultType="Product" parameterType="Product">
+    select
+    <include refid="View"/>
+    from mmall_product
+    <where>
+      <if test="productName != null">
+        and name like #{productName}
+      </if>
+      <if test="productId != null">
+        and id = #{productId}
+      </if>
+    </where>
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_product

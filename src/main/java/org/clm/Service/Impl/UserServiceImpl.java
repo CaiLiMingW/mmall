@@ -170,11 +170,11 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByErrorMessage("旧密码错误");
         }
         int i = userMapper.updatePasswordByusername(user.getUsername(), passwordNew);
-       /* if(i>0){*/
+        if(i>0){
             user.setPassword(passwordNew);
             return ServiceResponse.createBySuccessMessage("修改成功");
-       /* }
-        return ServiceResponse.createByErrorMessage("修改失败");*/
+        }
+        return ServiceResponse.createByErrorMessage("修改失败");
     }
 
     @Override
@@ -192,8 +192,10 @@ public class UserServiceImpl implements IUserService {
         updateuser.setPhone(user.getPhone());
 
         resultCount = userMapper.updateByPrimaryKeySelective(updateuser);
-
-        return ServiceResponse.createBySuccess("修改成功",user);
+        if (resultCount>0){
+            return ServiceResponse.createBySuccess("修改成功",user);
+        }
+       return ServiceResponse.createByErrorMessage("修改失败");
     }
 
     @Override

@@ -29,4 +29,6 @@ public interface IUserService {
     ServiceResponse<User> getInfomation(Integer id);
 
     ServiceResponse checkAdminRole(HttpSession session);
+
+
 }
