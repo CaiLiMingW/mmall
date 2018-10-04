@@ -30,5 +30,5 @@ public interface IUserService {
 
     ServiceResponse checkAdminRole(HttpSession session);
 
-
+    ServiceResponse<User> checkUserLogin(HttpSession session);
 }

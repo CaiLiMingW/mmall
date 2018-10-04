@@ -12,8 +12,26 @@
       <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
     </constructor>
   </resultMap>
+  <resultMap id="cartProduct" type="org.clm.VO.CartProductVo">
+    <result column="id" property="id"/>
+    <result column="user_id" property="userId"/>
+    <result column="product_id" property="productId"/>
+    <result column="quantity" property="quantity"/>
+
+    <result column="checked" property="productChecked"/>
+    <result column="name" property="productName" />
+    <result column="subtitle"  property="productSubtitle"/>
+    <result column="main_image"  property="productMainImage"/>
+    <result column="price"  property="productPrice"/>
+    <result column="stock"  property="productStock"/>
+    <result column="status" property="productStatus" />
+  </resultMap>
   <sql id="Base_Column_List" >
     id, user_id, product_id, quantity, checked, create_time, update_time
+  </sql>
+  <sql id="cartProduct">
+    c.id, c.user_id, c.product_id, c.quantity,c.checked,
+    p.name,p.subtitle,p.main_image,p.price,p.stock,p.status
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
@@ -21,10 +39,45 @@
     from mmall_cart
     where id = #{id,jdbcType=INTEGER}
   </select>
+  <select id="selectAll" resultMap="cartProduct" parameterType="int">
+  select
+  <include refid="cartProduct"/>
+  from mmall_cart c
+  left join mmall_product p
+  on c.product_id = p.id
+  where user_id = #{userId}
+  </select>
+  <select id="checkStockAndCar" resultType="Cart" parameterType="map">
+    select *
+    from mmall_cart
+    where product_id = #{productId}
+    and user_id = #{userId}
+  </select>
+  <select id="selectByIdAll" resultType="org.clm.Pojo.Cart" parameterType="int">
+    select
+    <include refid="Base_Column_List"/>
+    from mmall_cart
+    where
+    user_id = #{userId}
+  </select>
+  <!--<select id="selectCarByIdAndProtuct" resultType="org.clm.Pojo.Cart">
+    select
+  </select>-->
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_cart
     where id = #{id,jdbcType=INTEGER}
   </delete>
+  <delete id="deleteByIds" parameterType="map">
+    delete from mmall_cart
+    where user_id = #{userId}
+    <if test="productIdList != null">
+        and product_id in
+      <foreach collection="productIdList" item="item" index="index" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+  </delete>
+
   <insert id="insert" parameterType="org.clm.Pojo.Cart" >
     insert into mmall_cart (id, user_id, product_id, 
       quantity, checked, create_time, 
@@ -116,4 +169,14 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+  <update id="updateCheck" parameterType="map">
+  update mmall_cart
+  set checked = #{checked}
+  where user_id = #{userId}
+  <if test="productId != null">
+    and product_id = #{productId}
+  </if>
+  </update>
+
+
 </mapper>

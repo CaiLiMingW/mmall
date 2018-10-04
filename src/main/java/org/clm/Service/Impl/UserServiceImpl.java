@@ -225,5 +225,15 @@ public class UserServiceImpl implements IUserService {
         return ServiceResponse.createByErrorMessage("没有权限");
     }
 
+    @Override
+    public ServiceResponse<User> checkUserLogin(HttpSession session) {
+
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user==null){
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"用户未登录");
+        }
+        return ServiceResponse.createBySucces(user);
+    }
+
 
 }
