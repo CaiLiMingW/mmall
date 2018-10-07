@@ -101,4 +101,14 @@ public class CartController {
         }
         return response;
     }
+
+    @RequestMapping("/get_cart_product_count.do")
+    public ServiceResponse getCartProductcount(HttpSession session){
+
+        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        if (response.isSuccess()){
+            return iCartService.selectCartProductCount(response.getData());
+        }
+        return response;
+    }
 }

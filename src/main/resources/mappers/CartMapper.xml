@@ -60,9 +60,23 @@
     where
     user_id = #{userId}
   </select>
-  <!--<select id="selectCarByIdAndProtuct" resultType="org.clm.Pojo.Cart">
-    select
-  </select>-->
+  <select id="selectCartProductCount" resultType="java.lang.Integer" parameterType="integer">
+    select IFNULL (sum(quantity),0) as count
+    from mmall_cart
+    where
+    user_id = #{userId}
+  </select>
+    <select id="selectCartCheckedByUserId" resultType="org.clm.Pojo.Cart" parameterType="int">
+      select
+      <include refid="Base_Column_List"/>
+      from mmall_cart
+      where
+      user_id = #{userId}
+      and checked = 1
+    </select>
+    <!--<select id="selectCarByIdAndProtuct" resultType="org.clm.Pojo.Cart">
+      select
+    </select>-->
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_cart
     where id = #{id,jdbcType=INTEGER}

@@ -102,6 +102,12 @@ public class CartServiceImpl implements ICartService {
        return ServiceResponse.createByErrorMessage("失败");
     }
 
+    @Override
+    public ServiceResponse selectCartProductCount(User user) {
+        int reultCount = cartMapper.selectCartProductCount(user.getId());
+        return ServiceResponse.createBySucces(reultCount);
+    }
+
 
     private CartVo list(User user){
         List<CartProductVo> cartList = cartMapper.selectAll(user.getId());

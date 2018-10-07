@@ -1,6 +1,9 @@
 package org.clm.Dao;
 
+import org.apache.ibatis.annotations.Param;
 import org.clm.Pojo.Order;
+
+import java.util.List;
 
 public interface OrderMapper {
     int deleteByPrimaryKey(Integer id);
@@ -14,4 +17,10 @@ public interface OrderMapper {
     int updateByPrimaryKeySelective(Order record);
 
     int updateByPrimaryKey(Order record);
+
+    Order selectByOrderByIdAndUserId(@Param("orderNo") Long orderNo, @Param("userId") Integer userId);
+
+    Order selectByOrderNo(Long orderNo);
+
+    List<Order> selectByUserId(Integer userId);
 }

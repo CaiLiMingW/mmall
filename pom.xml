@@ -338,9 +338,13 @@
           <version>3.0.2</version>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.7.0</version>
           <configuration>
+            <source>1.7</source>
+            <target>1.7</target>
+            <encoding>UTF-8</encoding>
             <!--引入本地jar包-->
             <compilerArguments>
               <extdirs>${project.basedir}/src/main/webapp/WEB-INF/lib</extdirs>

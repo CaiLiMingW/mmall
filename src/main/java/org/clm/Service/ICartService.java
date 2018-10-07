@@ -22,4 +22,6 @@ public interface ICartService {
 
 
     ServiceResponse updateCheck(User user, Integer checked,Integer productId);
+
+    ServiceResponse selectCartProductCount(User user);
 }

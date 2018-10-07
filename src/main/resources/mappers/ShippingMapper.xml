@@ -27,7 +27,30 @@
     from mmall_shipping
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+  <select id="checkShippingById" resultType="java.lang.Integer" parameterType="int">
+    select count(1)
+    from mmall_shipping
+    where id = #{shippingId}
+  </select>
+  <select id="selectByUserIdAndShippingId" resultType="org.clm.Pojo.Shipping" parameterType="map">
+  select
+  <include refid="Base_Column_List"/>
+  from mmall_shipping
+  where id = #{shippingId}
+  and user_id = #{userId}
+  </select>
+  <select id="selectByPrimaryKeyList" resultType="Shipping" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from mmall_shipping
+    where user_id = #{userId}
+  </select>
+    <select id="selectReceiverNameByShippingId" resultType="java.lang.String" >
+      select receiver_name
+      from mmall_shipping
+      where id = #{shippingId}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_shipping
     where id = #{id,jdbcType=INTEGER}
   </delete>
@@ -43,7 +66,7 @@
       #{receiverZip,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
       )
   </insert>
-  <insert id="insertSelective" parameterType="org.clm.Pojo.Shipping" >
+  <insert id="insertSelective" parameterType="org.clm.Pojo.Shipping" useGeneratedKeys="true" keyProperty="id">
     insert into mmall_shipping
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >

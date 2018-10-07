@@ -29,6 +29,25 @@
     from mmall_order
     where id = #{id,jdbcType=INTEGER}
   </select>
+    <select id="selectByOrderByIdAndUserId" resultType="org.clm.Pojo.Order" parameterType="map">
+      select
+      <include refid="Base_Column_List"/>
+      from mmall_order
+      where order_no = #{orderNo}
+      and user_id = #{userId}
+    </select>
+  <select id="selectByOrderNo" resultType="org.clm.Pojo.Order" parameterType="long">
+    select
+    <include refid="Base_Column_List"/>
+    from mmall_order
+    where order_no = #{orderNo}
+  </select>
+  <select id="selectByUserId" resultType="org.clm.Pojo.Order">
+    select
+    <include refid="Base_Column_List"/>
+    from mmall_order
+    where user_id = #{userId}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_order
     where id = #{id,jdbcType=INTEGER}
