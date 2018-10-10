@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -25,10 +26,10 @@ public class OrderManageController {
     private IOrderService iOrderService;
 
     @RequestMapping("/list.do")
-    public ServiceResponse getOrderList(HttpSession session,
+    public ServiceResponse getOrderList(HttpServletRequest request,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        ServiceResponse response = iUserService.checkAdminRole(session);
+        ServiceResponse response = iUserService.checkAdminRole(request);
         if (response.isSuccess()){
             return iOrderService.getOrderListByUserId(null,pageNum,pageSize);
         }
@@ -36,18 +37,18 @@ public class OrderManageController {
     }
 
     @RequestMapping("/detail.do")
-    public ServiceResponse getOrderList(HttpSession session,Long orderNo){
-        ServiceResponse response = iUserService.checkAdminRole(session);
+    public ServiceResponse getOrderList(HttpServletRequest request,Long orderNo){
+        ServiceResponse response = iUserService.checkAdminRole(request);
         if (response.isSuccess()){
             return iOrderService.getOrderDeatilByOrderNo(null,orderNo);
         }
         return response;
     }
     @RequestMapping("/search.do")
-    public ServiceResponse getOrderList(HttpSession session,Long orderNo,
+    public ServiceResponse getOrderList(HttpServletRequest request, Long orderNo,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        ServiceResponse response = iUserService.checkAdminRole(session);
+        ServiceResponse response = iUserService.checkAdminRole(request);
         if (response.isSuccess()){
             return iOrderService.searchByOrderNoKey(pageNum,pageSize,orderNo);
         }
@@ -55,8 +56,8 @@ public class OrderManageController {
     }
 
     @RequestMapping("/send_goods.do")
-    public ServiceResponse sendgoods(HttpSession session,Long orderNo){
-        ServiceResponse response = iUserService.checkAdminRole(session);
+    public ServiceResponse sendgoods(HttpServletRequest request,Long orderNo){
+        ServiceResponse response = iUserService.checkAdminRole(request);
         if (response.isSuccess()){
             return iOrderService.sendgoods(orderNo);
         }

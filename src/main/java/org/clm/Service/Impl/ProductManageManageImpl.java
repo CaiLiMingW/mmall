@@ -2,38 +2,32 @@ package org.clm.Service.Impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mchange.v1.db.sql.ConnectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clm.Dao.CategoryMapper;
 import org.clm.Dao.ProductMapper;
 import org.clm.Pojo.Category;
 import org.clm.Pojo.Product;
 import org.clm.Service.IFileService;
-import org.clm.Service.IProductService;
-import org.clm.Service.IUserService;
+import org.clm.Service.IProductManageService;
 import org.clm.VO.ProductDetailVo;
 import org.clm.VO.ProductListVo;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
-import org.clm.util.DataTimeUtil;
 import org.clm.util.PropertiesUtil;
-import org.joda.time.DateTimeUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Ccc
  * @date 2018/9/29 0029 下午 7:05
  */
 @Service
-public class ProductManageImpl implements IProductService {
+public class ProductManageManageImpl implements IProductManageService {
+
     @Autowired
     private IFileService iFileService;
     @Autowired
@@ -132,6 +126,10 @@ public class ProductManageImpl implements IProductService {
         PageInfo pageInfo = new PageInfo(list);
         return ServiceResponse.createBySucces(pageInfo);
     }
+
+
+
+
 
     private ProductDetailVo copy(Product product){
         ProductDetailVo productDetailVo = new ProductDetailVo();

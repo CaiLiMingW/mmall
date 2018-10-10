@@ -29,7 +29,7 @@ public interface IUserService {
 
     ServiceResponse<User> getInfomation(Integer id);
 
-    ServiceResponse checkAdminRole(HttpSession session);
+    ServiceResponse checkAdminRole(HttpServletRequest request);
 
     ServiceResponse<User> checkUserLogin(HttpSession session);
 

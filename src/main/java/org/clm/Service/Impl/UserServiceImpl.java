@@ -15,7 +15,6 @@ import org.clm.util.RedisPoolUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
-import sun.security.util.Password;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -212,18 +211,29 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public ServiceResponse checkAdminRole(HttpSession session){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if(user==null){
-            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"用户未登录");
+    public ServiceResponse checkAdminRole(HttpServletRequest request){
+        /**从本地cookie获取sessionId*/
+        String sessionId = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(sessionId)){
+            return ServiceResponse.createByErrorMessage("用户登录时间已过期,无法获取用户信息");
         }
-        User user1 = userMapper.selectByPrimaryKey(user.getId());
+        /**根据sessionId从Redis获取当前登录用户信息的json字符串*/
+        String str = RedisPoolUtil.get(sessionId);
+        if (str==null){
+            return ServiceResponse.createByErrorMessage("用户未登录");
+        }
+        /**将jsonStr转换为pojo对象*/
+        User user = JsonUtil.StringToObj(str, User.class);
+        if (user==null){
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
+        }
 
+        User user1 = userMapper.selectByPrimaryKey(user.getId());
         if (user1==null){
             ServiceResponse.createByErrorMessage("用户不存在");
         }
 
-        if(user.getRole()== Const.Role.ROLE_ADMIN){
+        if(user1.getRole()== Const.Role.ROLE_ADMIN){
             return ServiceResponse.createBySucces(user);
         }
         return ServiceResponse.createByErrorMessage("没有权限");

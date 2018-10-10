@@ -45,8 +45,8 @@ public class OrderController {
 
 
     @RequestMapping("/create.do")
-    public ServiceResponse createOrder(HttpSession session,Integer shippingId){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse createOrder(HttpServletRequest request,Integer shippingId){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iOrderService.createOrder(response.getData().getId(),shippingId);
         }
@@ -54,8 +54,8 @@ public class OrderController {
     }
 
     @RequestMapping("/get_order_cart_product.do")
-    public ServiceResponse getOrderCartProduct(HttpSession session){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse getOrderCartProduct(HttpServletRequest request){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iOrderService.getOrderProduct(response.getData().getId());
         }
@@ -63,10 +63,10 @@ public class OrderController {
     }
 
     @RequestMapping("/list.do")
-    public ServiceResponse getOrderList(HttpSession session,
+    public ServiceResponse getOrderList(HttpServletRequest request,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iOrderService.getOrderListByUserId(response.getData().getId(),pageNum,pageSize);
         }
@@ -75,8 +75,8 @@ public class OrderController {
 
 
     @RequestMapping("/detail.do")
-    public ServiceResponse getOrderDeatil(HttpSession session,Long orderNo){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse getOrderDeatil(HttpServletRequest request,Long orderNo){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iOrderService.getOrderDeatilByOrderNo(response.getData().getId(),orderNo);
         }
@@ -84,8 +84,8 @@ public class OrderController {
     }
 
     @RequestMapping("/cancel.do")
-    public ServiceResponse cancelOrder(HttpSession session,Long orderNo){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse cancelOrder(HttpServletRequest request,Long orderNo){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iOrderService.cancelOrderByOrderNo(response.getData().getId(),orderNo);
         }
@@ -102,8 +102,8 @@ public class OrderController {
 
 
     @RequestMapping("/pay.do")
-    public ServiceResponse pay(HttpSession session , Long orderNo, HttpServletRequest request){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse pay(Long orderNo, HttpServletRequest request){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         String path = request.getSession().getServletContext().getRealPath("upload");
         if (response.isSuccess()){
             return iOrderService.pay(orderNo,response.getData().getId(),path);
@@ -121,8 +121,8 @@ public class OrderController {
     }
 
     @RequestMapping("/query_order_pay_status.do")
-    public ServiceResponse queryOrderPayStatus(HttpSession session , Long orderNo){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse queryOrderPayStatus(HttpServletRequest request , Long orderNo){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iOrderService.getOrderPayStatus(orderNo);
         }

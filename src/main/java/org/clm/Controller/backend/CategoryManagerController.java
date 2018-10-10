@@ -8,6 +8,7 @@ import org.clm.common.ServiceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
@@ -34,8 +35,8 @@ public class CategoryManagerController {
     }
 
     @RequestMapping(value = "/add_category.do",method = RequestMethod.POST)
-    public ServiceResponse addCategory(HttpSession session,String categoryName,@RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
-        ServiceResponse serviceResponse = iUserService.checkAdminRole(session);
+    public ServiceResponse addCategory(HttpServletRequest request, String categoryName, @RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
+        ServiceResponse serviceResponse = iUserService.checkAdminRole(request);
         if (serviceResponse.isSuccess()){
             return iCategoryManageService.addCategory(categoryName,parentId);
         }
@@ -44,9 +45,9 @@ public class CategoryManagerController {
     }
 
     @RequestMapping(value = "/set_category_name.do",method = RequestMethod.POST)
-    public ServiceResponse setCategory(HttpSession session,String categoryName,
+    public ServiceResponse setCategory(HttpServletRequest request,String categoryName,
                                        @RequestParam(value = "categoryId",defaultValue = "0")Integer categoryId){
-        ServiceResponse response = iUserService.checkAdminRole(session);
+        ServiceResponse response = iUserService.checkAdminRole(request);
         if (response.isSuccess()){
             return iCategoryManageService.setCategoryName(categoryName,categoryId);
         }
@@ -54,9 +55,9 @@ public class CategoryManagerController {
     }
 
     @RequestMapping(value = "/get_deep_category.do",method = RequestMethod.GET)
-    public ServiceResponse getChilerCategoryId(HttpSession session,
+    public ServiceResponse getChilerCategoryId(HttpServletRequest request,
                                                @RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
-        ServiceResponse response = iUserService.checkAdminRole(session);
+        ServiceResponse response = iUserService.checkAdminRole(request);
         if(response.isSuccess()){
             return iCategoryManageService.getAllChildCategoryById(categoryId);
         }

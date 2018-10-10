@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -23,11 +24,12 @@ public class CartController {
     private IUserService iUserService;
     @Autowired
     private ICartService iCartService;
+    
 
 
     @RequestMapping("/add.do")
-    public ServiceResponse add(HttpSession session,Integer productId,Integer count){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse add(HttpServletRequest request, Integer productId, Integer count){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if(response.isSuccess()){
             return iCartService.addCartProduct(response.getData(),productId,count);
         }
@@ -35,8 +37,8 @@ public class CartController {
     }
 
     @RequestMapping("/update.do")
-    public ServiceResponse updateCart(HttpSession session,Integer productId,Integer count){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse updateCart(HttpServletRequest request,Integer productId,Integer count){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if(response.isSuccess()){
             return iCartService.updateCart(response.getData(),productId,count);
         }
@@ -44,18 +46,18 @@ public class CartController {
     }
 
     @RequestMapping("/delete_product.do")
-    public ServiceResponse deleteProductCart(HttpSession session,String ids){
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+    public ServiceResponse deleteProductCart(HttpServletRequest request,String productIds){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if(response.isSuccess()){
-            return iCartService.deleteCartProduct(response.getData(),ids);
+            return iCartService.deleteCartProduct(response.getData(),productIds);
         }
         return response;
     }
 
     @RequestMapping("/list.do")
-    public ServiceResponse getCartList(HttpSession session){
+    public ServiceResponse getCartList(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
            return iCartService.getCartProductList(response.getData());
         }
@@ -63,9 +65,9 @@ public class CartController {
     }
 
     @RequestMapping("/select_all.do")
-    public ServiceResponse chooseAll(HttpSession session){
+    public ServiceResponse chooseAll(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iCartService.updateCheck(response.getData(), Const.Cart.CHECKED,null);
         }
@@ -73,9 +75,9 @@ public class CartController {
     }
 
     @RequestMapping("/un_select_all.do")
-    public ServiceResponse unchooseAll(HttpSession session){
+    public ServiceResponse unchooseAll(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iCartService.updateCheck(response.getData(), Const.Cart.UN_CHECKED,null);
         }
@@ -83,9 +85,9 @@ public class CartController {
     }
 
     @RequestMapping("/un_select.do")
-    public ServiceResponse unChooseOne(HttpSession session,Integer productId){
+    public ServiceResponse unChooseOne(HttpServletRequest request,Integer productId){
 
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iCartService.updateCheck(response.getData(), Const.Cart.UN_CHECKED,productId);
         }
@@ -93,9 +95,9 @@ public class CartController {
     }
 
     @RequestMapping("/select.do")
-    public ServiceResponse ChooseOne(HttpSession session,Integer productId){
+    public ServiceResponse ChooseOne(HttpServletRequest request,Integer productId){
 
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iCartService.updateCheck(response.getData(), Const.Cart.CHECKED,productId);
         }
@@ -103,9 +105,9 @@ public class CartController {
     }
 
     @RequestMapping("/get_cart_product_count.do")
-    public ServiceResponse getCartProductcount(HttpSession session){
+    public ServiceResponse getCartProductcount(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
             return iCartService.selectCartProductCount(response.getData());
         }

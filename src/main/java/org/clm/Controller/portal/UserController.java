@@ -43,7 +43,7 @@ public class UserController {
      * @return
      */
     @RequestMapping(value = "/login.do",method = RequestMethod.POST)
-    public ServiceResponse<User> login(String username, String password, HttpServletResponse responseCookie, HttpServletRequest request, HttpSession session){
+    public ServiceResponse<User> login(String username, String password, HttpServletResponse responseCookie, HttpSession session){
         ServiceResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()){
             /**
@@ -59,10 +59,10 @@ public class UserController {
 
     /**
      * 登出
-     * @param session
+     * @param
      * @return
      */
-    @RequestMapping(value = "/outlogin.do",method = RequestMethod.POST)
+    @RequestMapping(value = "/logout.do",method = RequestMethod.POST)
     public ServiceResponse<User> outlogin(HttpServletResponse responseCookie,HttpServletRequest request){
         CookieUtil.delLoginToken(request,responseCookie);
         ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
@@ -96,7 +96,7 @@ public class UserController {
 
     /**
      * 获取当前会话用户信息
-     * @param session 当前会话
+     * @param
      * @return 返回会话信息
      */
     @RequestMapping(value ="/get_user_info.do" ,method =RequestMethod.POST )
@@ -126,12 +126,12 @@ public class UserController {
         return iUserService.forgetrestPassword(username,passwordNew,forgetToken);
     }
     //todo
-    @RequestMapping(value ="/rest_password.do" ,method =RequestMethod.POST )
+    @RequestMapping(value ="/reset_password.do" ,method =RequestMethod.POST )
     public ServiceResponse<String> resetPassword(String passwordOld,String passwordNew,HttpSession session){
         User user = (User) session.getAttribute(Const.CURRENT_USER);
         return iUserService.restPassword(passwordOld,passwordNew,user);
     }
-    @RequestMapping(value ="/update_Information.do" ,method =RequestMethod.POST )
+    @RequestMapping(value ="/update_information.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> updateInfomation(HttpServletRequest request,User user){
         ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
@@ -140,7 +140,7 @@ public class UserController {
         return response;
     }
 
-    @RequestMapping(value ="/get_Information.do" ,method =RequestMethod.POST )
+    @RequestMapping(value ="/get_information.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> getInfomation(HttpServletRequest request){
         ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){

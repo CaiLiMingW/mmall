@@ -1,5 +1,6 @@
 package org.clm.common;
 
+
 /** 常态常量
  * @author Ccc
  * @date 2018/9/27 0027 上午 10:34
@@ -11,6 +12,12 @@ public class Const {
     public static final String USERNAME = "username";
     public interface RedisCacheExtime{
         int REDIS_SESSION_EXTIME = 60*30;
+    }
+
+    public interface OrderBy{
+        String PRICE_DESC = "price DESC";
+        String PRICE_ASC  = "price ASC";
+        String NULL  = "";
     }
 
     public interface Cart{
