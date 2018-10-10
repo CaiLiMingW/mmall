@@ -19,9 +19,37 @@
       <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
     </constructor>
   </resultMap>
+  <resultMap id="OrderVoMap" type="org.clm.VO.OrderVo" >
+      <result column="order_no" property="orderNo" />
+      <result column="payment" property="payment" />
+      <result column="payment_type" property="paymentType" />
+      <result column="postage" property="postage" />
+      <result column="status" property="status" />
+      <result column="payment_time" property="paymentTime" />
+      <result column="send_time" property="sendTime" />
+      <result column="end_time" property="endTime" />
+      <result column="close_time" property="closeTime" />
+      <result column="create_time" property="createTime" />
+      <result column="shipping_id" property="shippingId"/>
+      <collection property="orderItemVoList" javaType="java.util.ArrayList" ofType="org.clm.VO.OrderItemVo" >
+        <result column="order_no" property="orderNo" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_image" property="productImage" />
+        <result column="current_unit_price" property="currentUnitPrice" />
+        <result column="quantity" property="quantity" />
+        <result column="total_price" property="totalPrice" />
+        <result column="create_time" property="createTime" />
+      </collection>
+  </resultMap>
   <sql id="Base_Column_List" >
     id, order_no, user_id, shipping_id, payment, payment_type, postage, status, payment_time, 
     send_time, end_time, close_time, create_time, update_time
+  </sql>
+  <sql id="OrderVoByOrderNOKey">
+    o.order_no,o.payment,o.payment_type, o.postage, o.status, o.payment_time,o.send_time, o.end_time, o.close_time,
+     o.create_time,o.shipping_id,i.order_no, i.product_id, i.product_name, i.product_image, i.current_unit_price,
+    i.quantity, i.total_price, i.create_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
@@ -29,7 +57,7 @@
     from mmall_order
     where id = #{id,jdbcType=INTEGER}
   </select>
-    <select id="selectByOrderByIdAndUserId" resultType="org.clm.Pojo.Order" parameterType="map">
+  <select id="selectByOrderByIdAndUserId" resultType="org.clm.Pojo.Order" parameterType="map">
       select
       <include refid="Base_Column_List"/>
       from mmall_order
@@ -42,11 +70,33 @@
     from mmall_order
     where order_no = #{orderNo}
   </select>
-  <select id="selectByUserId" resultType="org.clm.Pojo.Order">
+  <select id="selectByUserId" resultType="org.clm.Pojo.Order" parameterType="integer">
     select
     <include refid="Base_Column_List"/>
     from mmall_order
-    where user_id = #{userId}
+    <where>
+      <if test="userId != null">
+         user_id = #{userId}
+      </if>
+    </where>
+    ORDER BY create_time desc
+  </select>
+  <select id="selectByOrderNoKey" resultType="org.clm.Pojo.Order">
+    select
+    <include refid="Base_Column_List"/>
+    from mmall_order
+    where
+    order_no like '%${orderNo}%'
+    ORDER BY create_time desc
+  </select>
+  <select id="selectOrderVoByKey" resultMap="OrderVoMap" >
+  select
+  <include refid="OrderVoByOrderNOKey"/>
+  from mmall_order o
+  left join mmall_order_item i
+  on o.order_no = i.order_no
+  where o.order_no like '%${orderNo}%'
+
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_order

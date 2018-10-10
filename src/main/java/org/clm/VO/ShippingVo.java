@@ -5,6 +5,12 @@ package org.clm.VO;
  * @date 2018/10/7 0007 上午 11:30
  */
 public class ShippingVo {
+    /**
+     * id
+     * userId
+     * updatetime
+     * createtime
+     */
     private String receiverName;
 
     private String receiverPhone;

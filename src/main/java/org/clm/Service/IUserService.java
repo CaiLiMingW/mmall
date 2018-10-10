@@ -3,6 +3,7 @@ package org.clm.Service;
 import org.clm.Pojo.User;
 import org.clm.common.ServiceResponse;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -31,4 +32,6 @@ public interface IUserService {
     ServiceResponse checkAdminRole(HttpSession session);
 
     ServiceResponse<User> checkUserLogin(HttpSession session);
+
+    ServiceResponse<User> checkUserLoginCookie(HttpServletRequest request);
 }

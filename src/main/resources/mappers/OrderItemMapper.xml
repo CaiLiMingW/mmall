@@ -30,14 +30,32 @@
       select
       <include refid="Base_Column_List"/>
       from mmall_order_item
-      where user_id = #{userId}
-      and order_no = #{orderNo}
+      <where>
+        <if test="userId != null">
+          user_id = #{userId}
+        </if>
+        <if test="orderNo != null" >
+          and order_no = #{orderNo}
+        </if>
+      </where>
     </select>
-  <select id="selectByUserId" resultType="org.clm.Pojo.OrderItem">
+  <select id="selectByUserId" resultType="org.clm.Pojo.OrderItem" parameterType="integer">
     select
     <include refid="Base_Column_List"/>
     from mmall_order_item
-    where user_id = #{userId}
+    <where>
+      <if test="userId != null">
+        user_id = #{userId}
+      </if>
+    </where>
+    ORDER BY create_time desc
+  </select>
+  <select id="selectByOrderNoKey" resultType="org.clm.Pojo.OrderItem">
+    select
+    <include refid="Base_Column_List"/>
+    from mmall_order_item
+    where order_no like '%${orderNo}%'
+    ORDER BY create_time desc
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_order_item

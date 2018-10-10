@@ -22,4 +22,12 @@ public interface IOrderService {
     ServiceResponse getOrderProduct(Integer userId);
 
     ServiceResponse getOrderListByUserId(Integer userId,Integer pageNum,Integer pageSize);
+
+    ServiceResponse getOrderDeatilByOrderNo(Integer userId, Long orderNo);
+
+    ServiceResponse cancelOrderByOrderNo(Integer useId, Long orderNo);
+
+    ServiceResponse searchByOrderNoKey(Integer pageNum, Integer pageSize, Long orderNo);
+
+    ServiceResponse sendgoods(Long orderNo);
 }

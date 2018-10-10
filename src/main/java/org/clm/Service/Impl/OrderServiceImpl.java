@@ -30,6 +30,7 @@ import org.clm.Service.IOrderService;
 import org.clm.VO.OrderItemVo;
 import org.clm.VO.OrderProductVo;
 import org.clm.VO.OrderVo;
+import org.clm.VO.ShippingVo;
 import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
 import org.clm.util.*;
@@ -369,12 +370,13 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public ServiceResponse<PageInfo> getOrderListByUserId(Integer userId,Integer pageNum,Integer pageSize) {
         PageHelper.startPage(pageNum,pageSize);
+        /**如果userId为NULL，管理员操作*/
+
         List<Order> orderList = orderMapper.selectByUserId(userId);
         List<OrderItem> orderItemList = orderItemMapper.selectByUserId(userId);
         List<OrderVo> orderVoList = new ArrayList<>();
         for (Order order : orderList) {
             List<OrderItem> orderItems = new ArrayList<>();
-
             for (OrderItem orderItem : orderItemList) {
                 if (order.getOrderNo().equals(orderItem.getOrderNo())){
                     orderItems.add(orderItem);
@@ -387,6 +389,97 @@ public class OrderServiceImpl implements IOrderService {
         pageInfo.setList(orderVoList);
 
         return ServiceResponse.createBySucces(pageInfo);
+    }
+
+    @Override
+    public ServiceResponse getOrderDeatilByOrderNo(Integer userId, Long orderNo) {
+        if(orderNo==null){
+            return ServiceResponse.createByErrorMessage("订单号为空");
+        }
+        Order order = orderMapper.selectByOrderNo(orderNo);
+        if (order==null){
+            return ServiceResponse.createByErrorMessage("没有找到订单");
+        }
+        List<OrderItem> orderItemList = orderItemMapper.selectByUserIdAndOrderNo(userId, orderNo);
+        OrderVo orderVo = this.createOrderVo(order, orderItemList);
+
+        /**设置地址详情*/
+        ShippingVo shippingVo = new ShippingVo();
+        Shipping shipping = shippingMapper.selectByPrimaryKey(orderVo.getShippingId());
+        BeanUtils.copyProperties(shipping,shippingVo,new String[]{"id","userId0","createTime","updateTime"});
+        orderVo.setShippingVo(shippingVo);
+
+        return ServiceResponse.createBySucces(orderVo);
+    }
+
+    @Override
+    public ServiceResponse cancelOrderByOrderNo(Integer useId, Long orderNo) {
+        if(orderNo==null){
+            return ServiceResponse.createByErrorMessage("订单号为空");
+        }
+        Order order = orderMapper.selectByOrderNo(orderNo);
+        if (order==null){
+            return ServiceResponse.createByErrorMessage("该用户没有此订单");
+        }
+        if(order.getStatus()>=Const.OrderStatusEnum.PAID.getCode()){
+            return ServiceResponse.createByErrorMessage("此订单已付款，无法被取消");
+        }
+
+        int resultCow = orderMapper.deleteByPrimaryKey(order.getId());
+        if (resultCow>0){
+            return ServiceResponse.createBySuccess();
+        }
+        return ServiceResponse.createByErrorMessage("订单取消失败");
+    }
+
+    @Override
+    public ServiceResponse searchByOrderNoKey(Integer pageNum, Integer pageSize, Long orderNo) {
+        PageHelper.startPage(pageNum,pageSize);
+
+        List<OrderVo> orderVoList = orderMapper.selectOrderVoByKey(orderNo);
+        for (OrderVo orderVo : orderVoList) {
+            /**设置地址详情*/
+            ShippingVo shippingVo = new ShippingVo();
+            Shipping shipping = shippingMapper.selectByPrimaryKey(orderVo.getShippingId());
+            BeanUtils.copyProperties(shipping,shippingVo,new String[]{"id","userId0","createTime","updateTime"});
+            orderVo.setShippingVo(shippingVo);
+            orderVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix"));
+            /**收货人*/
+            String ReceiverName = shippingMapper.selectReceiverNameByShippingId(orderVo.getShippingId());
+            orderVo.setReceiverName(ReceiverName);
+            /**订单状态描述*/
+            orderVo.setStatusDesc(Const.OrderStatusEnum.codeOf(orderVo.getStatus()).getValue());
+            /**支付状态描述*/
+            orderVo.setPaymentTypeDesc(Const.PaymentTypeEnum.codeOf(orderVo.getPaymentType()).getValue());
+            /***/
+        }
+        PageInfo pageInfo = new PageInfo(orderVoList);
+
+
+        return ServiceResponse.createBySucces(pageInfo);
+    }
+
+    @Override
+    public ServiceResponse sendgoods(Long orderNo) {
+        if (orderNo==null){
+            return ServiceResponse.createByErrorMessage("订单号不存在");
+        }
+        Order order = orderMapper.selectByOrderNo(orderNo);
+        if (order==null){
+            return ServiceResponse.createByErrorMessage("该订单不存在");
+        }
+        if (order.getStatus().equals(Const.OrderStatusEnum.PAID.getCode())){
+            order.setStatus(Const.OrderStatusEnum.SHIPPED.getCode());
+            int updateCow = orderMapper.updateByPrimaryKeySelective(order);
+            if (updateCow > 0){
+                return ServiceResponse.createBySuccessMessage("发货成功");
+            }
+            return ServiceResponse.createByErrorMessage("发货失败");
+        }
+        if(order.getStatus()>Const.OrderStatusEnum.PAID.getCode()){
+            return ServiceResponse.createByErrorMessage("该商品已发货");
+        }
+        return ServiceResponse.createByErrorMessage("该商品未付款");
     }
 
     private OrderVo createOrderVo(Order order, List<OrderItem> orderItemList) {

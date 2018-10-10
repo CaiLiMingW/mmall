@@ -9,6 +9,9 @@ public class Const {
 
     public static final String EMAIL = "email";
     public static final String USERNAME = "username";
+    public interface RedisCacheExtime{
+        int REDIS_SESSION_EXTIME = 60*30;
+    }
 
     public interface Cart{
         int CHECKED = 1;//即购物车选中状态

@@ -8,6 +8,9 @@ import org.clm.Service.IUserService;
 import org.clm.common.Const;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
+import org.clm.util.CookieUtil;
+import org.clm.util.JsonUtil;
+import org.clm.util.RedisPoolUtil;
 import org.joda.time.YearMonth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -37,10 +43,16 @@ public class UserController {
      * @return
      */
     @RequestMapping(value = "/login.do",method = RequestMethod.POST)
-    public ServiceResponse<User> login(String username, String password, HttpSession session){
+    public ServiceResponse<User> login(String username, String password, HttpServletResponse responseCookie, HttpServletRequest request, HttpSession session){
         ServiceResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()){
-            session.setAttribute(Const.CURRENT_USER,response.getData());
+            /**
+             * 把sessionId写入cookie
+             * 存入redis中 key= sessionId,Value = UserJsonString
+             */
+            CookieUtil.writeLoginToken(responseCookie,session.getId());
+            RedisPoolUtil.setEx(session.getId(), JsonUtil.objToString(response.getData()),
+                                Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
         }
         return response;
     }
@@ -51,9 +63,13 @@ public class UserController {
      * @return
      */
     @RequestMapping(value = "/outlogin.do",method = RequestMethod.POST)
-    public ServiceResponse<User> outlogin(HttpSession session){
-        session.removeAttribute(Const.CURRENT_USER);
-        return ServiceResponse.createBySuccess();
+    public ServiceResponse<User> outlogin(HttpServletResponse responseCookie,HttpServletRequest request){
+        CookieUtil.delLoginToken(request,responseCookie);
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
+        if (response.isSuccess()){
+            return ServiceResponse.createBySuccess();
+        }
+        return ServiceResponse.createByErrorMessage("还未登录，何来退出");
     }
 
     /**
@@ -84,12 +100,10 @@ public class UserController {
      * @return 返回会话信息
      */
     @RequestMapping(value ="/get_user_info.do" ,method =RequestMethod.POST )
-    public ServiceResponse<User> getUserInfo(HttpSession session){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if(user != null){
-            return ServiceResponse.createBySucces(user);
-        }
-        return ServiceResponse.createByErrorMessage("用户未登录,无法获取当前用户信息");
+    public ServiceResponse<User> getUserInfo(HttpServletRequest request){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
+
+        return response;
     }
 
     /**
@@ -111,35 +125,27 @@ public class UserController {
     public ServiceResponse<String> forgetRestPassword(String username,String passwordNew,String forgetToken){
         return iUserService.forgetrestPassword(username,passwordNew,forgetToken);
     }
-
+    //todo
     @RequestMapping(value ="/rest_password.do" ,method =RequestMethod.POST )
     public ServiceResponse<String> resetPassword(String passwordOld,String passwordNew,HttpSession session){
         User user = (User) session.getAttribute(Const.CURRENT_USER);
         return iUserService.restPassword(passwordOld,passwordNew,user);
     }
     @RequestMapping(value ="/update_Information.do" ,method =RequestMethod.POST )
-    public ServiceResponse<User> updateInfomation(HttpSession session,User user){
-        User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
-        if (currentUser ==null){
-            ServiceResponse.createByErrorMessage("用户未登录");
-        }
-        //设置id为当前会话用户id，防止被改变
-        user.setId(currentUser.getId());
-        user.setUsername(currentUser.getUsername());
-        ServiceResponse<User> response = iUserService.updateInfomation(user);
-        if(response.isSuccess()){
-            session.setAttribute(Const.CURRENT_USER,response.getData());
+    public ServiceResponse<User> updateInfomation(HttpServletRequest request,User user){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
+        if (response.isSuccess()){
+            return iUserService.updateInfomation(response.getData());
         }
         return response;
     }
 
     @RequestMapping(value ="/get_Information.do" ,method =RequestMethod.POST )
-    public ServiceResponse<User> getInfomation(HttpSession session){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if(user == null){
-            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
+    public ServiceResponse<User> getInfomation(HttpServletRequest request){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
+        if (response.isSuccess()){
+            return iUserService.getInfomation(response.getData().getId());
         }
-        user.setPassword(StringUtils.EMPTY);
-        return iUserService.getInfomation(user.getId());
+       return response;
     }
 }

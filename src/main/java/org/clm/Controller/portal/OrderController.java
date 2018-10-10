@@ -74,6 +74,26 @@ public class OrderController {
     }
 
 
+    @RequestMapping("/detail.do")
+    public ServiceResponse getOrderDeatil(HttpSession session,Long orderNo){
+        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        if (response.isSuccess()){
+            return iOrderService.getOrderDeatilByOrderNo(response.getData().getId(),orderNo);
+        }
+        return response;
+    }
+
+    @RequestMapping("/cancel.do")
+    public ServiceResponse cancelOrder(HttpSession session,Long orderNo){
+        ServiceResponse<User> response = iUserService.checkUserLogin(session);
+        if (response.isSuccess()){
+            return iOrderService.cancelOrderByOrderNo(response.getData().getId(),orderNo);
+        }
+        return response;
+    }
+
+
+
 
 
 

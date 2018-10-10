@@ -9,11 +9,15 @@ import org.clm.common.Const;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
 import org.clm.common.TokenCache;
+import org.clm.util.CookieUtil;
+import org.clm.util.JsonUtil;
+import org.clm.util.RedisPoolUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import sun.security.util.Password;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.UUID;
 
@@ -220,17 +224,37 @@ public class UserServiceImpl implements IUserService {
         }
 
         if(user.getRole()== Const.Role.ROLE_ADMIN){
-            return ServiceResponse.createBySuccess();
+            return ServiceResponse.createBySucces(user);
         }
         return ServiceResponse.createByErrorMessage("没有权限");
     }
 
     @Override
     public ServiceResponse<User> checkUserLogin(HttpSession session) {
-
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        String str = RedisPoolUtil.get(session.getId());
+        if (str==null){
+            return ServiceResponse.createByErrorMessage("用户未登录");
+        }
+        User user = JsonUtil.StringToObj(str, User.class);
         if (user==null){
-            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"用户未登录");
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
+        }
+        return ServiceResponse.createBySucces(user);
+    }
+
+    @Override
+    public ServiceResponse<User> checkUserLoginCookie(HttpServletRequest request) {
+        String sessionId = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(sessionId)){
+            return ServiceResponse.createByErrorMessage("用户登录时间已过期,无法获取用户信息");
+        }
+        String str = RedisPoolUtil.get(sessionId);
+        if (str==null){
+            return ServiceResponse.createByErrorMessage("用户未登录");
+        }
+        User user = JsonUtil.StringToObj(str, User.class);
+        if (user==null){
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
         }
         return ServiceResponse.createBySucces(user);
     }

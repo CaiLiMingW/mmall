@@ -2,6 +2,7 @@ package org.clm.Dao;
 
 import org.apache.ibatis.annotations.Param;
 import org.clm.Pojo.Order;
+import org.clm.VO.OrderVo;
 
 import java.util.List;
 
@@ -22,5 +23,9 @@ public interface OrderMapper {
 
     Order selectByOrderNo(Long orderNo);
 
-    List<Order> selectByUserId(Integer userId);
+    List<Order> selectByUserId(@Param("userId") Integer userId);
+
+    List<Order> selectByOrderNoKey(Long orderNo);
+
+    List<OrderVo> selectOrderVoByKey(@Param("orderNo") Long orderNo);
 }
