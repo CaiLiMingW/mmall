@@ -29,6 +29,7 @@ public class ShippingServiceImpl implements IShippingService {
         if(shipping==null){
             return ServiceResponse.createByErrorMessage("地址信息错误");
         }
+        shipping.setUserId(user.getId());
         int i = shippingMapper.insertSelective(shipping);
         if(i>0){
             Map map = new HashMap();

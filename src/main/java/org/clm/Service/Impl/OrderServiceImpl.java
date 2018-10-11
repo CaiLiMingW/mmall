@@ -159,7 +159,7 @@ public class OrderServiceImpl implements IOrderService {
                 .setOperatorId(operatorId).setStoreId(storeId).setExtendParams(extendParams)
                 .setTimeoutExpress(timeoutExpress)
                 /*支付宝服务器主动通知商户服务器里指定的页面http路径,根据需要设置*/
-                .setNotifyUrl("http://pks9x7.natappfree.cc/order/alipay_callback.do")
+                .setNotifyUrl(PropertiesUtil.getProperty("alipay.callback.url","http://120.78.128.136/order/alipay_callback.do"))
                 .setGoodsDetailList(goodsDetailList);
 
         // 调用tradePay方法获取当面付应答
@@ -180,18 +180,19 @@ public class OrderServiceImpl implements IOrderService {
                 // 需要修改为运行机器上的路径 注意加/  "path/+qr-response.getOutTradeNo().png"
                 String qrPath = String.format(path+"/qr-%s.png", response.getOutTradeNo());
                 String qrFileName = String.format("/qr-%s.png", response.getOutTradeNo());
+                //生成二维码图片
                 ZxingUtils.getQRCodeImge(response.getQrCode(), 256, qrPath);
                 //                ZxingUtils.getQRCodeImge(response.getQrCode(), 256, filePath);
                 /**将二维码图片(qrFileName)文件上传path*/
                 File targetFile = new File(path,qrFileName);
                 try {
-                    FTPUtil.uploadFile(Lists.newArrayList(targetFile));
+                    boolean b = FTPUtil.uploadFile(Lists.newArrayList(targetFile));
                 } catch (IOException e) {
                     log.error("上传二维码异常",e);
                 }
                 String qrUrl = PropertiesUtil.getProperty("ftp.server.http.prefix")+targetFile.getName();
-                map.put("qrPath",qrUrl);
-                log.info("filePath:" + qrPath);
+                map.put("qrUrl",qrUrl);
+                log.info("上传的文件路径:\\n" + qrPath);
 
                 return ServiceResponse.createBySucces(map);
             case FAILED:
@@ -354,6 +355,9 @@ public class OrderServiceImpl implements IOrderService {
 
         /***/
         ServiceResponse response = this.getOrderItemList(cartList);
+        if (!response.isSuccess()){
+            return response;
+        }
         List<OrderItem> orderItemList = (List<OrderItem>) response.getData();
         for (OrderItem orderItem : orderItemList) {
             OrderItemVo orderItemVo = new OrderItemVo();

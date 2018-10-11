@@ -34,7 +34,7 @@ public class CategoryManagerController {
         return iCategoryManageService.getCategory(categoryId);
     }
 
-    @RequestMapping(value = "/add_category.do",method = RequestMethod.POST)
+    @RequestMapping(value = "/add_category.do",method = RequestMethod.GET)
     public ServiceResponse addCategory(HttpServletRequest request, String categoryName, @RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
         ServiceResponse serviceResponse = iUserService.checkAdminRole(request);
         if (serviceResponse.isSuccess()){
@@ -44,7 +44,7 @@ public class CategoryManagerController {
 
     }
 
-    @RequestMapping(value = "/set_category_name.do",method = RequestMethod.POST)
+    @RequestMapping(value = "/set_category_name.do",method = RequestMethod.GET)
     public ServiceResponse setCategory(HttpServletRequest request,String categoryName,
                                        @RequestParam(value = "categoryId",defaultValue = "0")Integer categoryId){
         ServiceResponse response = iUserService.checkAdminRole(request);

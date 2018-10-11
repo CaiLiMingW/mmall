@@ -140,7 +140,7 @@ public class UserServiceImpl implements IUserService {
     public ServiceResponse<String> checkAnswer(String username,String question,String answer){
         int resultCount = userMapper.checkAnswer(username,question,answer);
         if(resultCount > 0){
-            /**说明该用户问题答案正确*/
+            /**问题答案正确*/
             String forgetToken = UUID.randomUUID().toString();
             TokenCache.setkey("token_"+username,forgetToken);
             return ServiceResponse.createBySucces(forgetToken);
@@ -150,18 +150,18 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse<String> forgetrestPassword(String username,String passwordNew,String fotgetToken){
-        if(StringUtils.isNotBlank(fotgetToken)){
-            return ServiceResponse.createByErrorMessage("参数错误，token需要传递");
+        if(StringUtils.isBlank(fotgetToken)){
+            return ServiceResponse.createByErrorMessage("参数错误，token为空");
         }
-        String token = TokenCache.getkey("token"+username);
-        if(StringUtils.isNotBlank(token)){
-            return ServiceResponse.createByErrorMessage("请求已超时");
+        String token = TokenCache.getkey("token_"+username);
+        if(StringUtils.isBlank(token)){
+            return ServiceResponse.createByErrorMessage("Token无效或已过期");
         }
-        if(StringUtils.equals(token,fotgetToken)){
-            int i = userMapper.updatePasswordByusername(username, passwordNew);
-        }else {
+        if(!StringUtils.equals(token,fotgetToken)){
+
             return ServiceResponse.createByErrorMessage("token错误,请重新进行修改");
         }
+        userMapper.updatePasswordByusername(username, passwordNew);
         return ServiceResponse.createBySuccessMessage("修改密码成功");
     }
 
@@ -189,6 +189,7 @@ public class UserServiceImpl implements IUserService {
         }
         /**只修改以下内容,防止越权修改*/
         User updateuser = new User();
+        updateuser.setId(user.getId());
         updateuser.setEmail(user.getEmail());
         updateuser.setQuestion(user.getQuestion());
         updateuser.setAnswer(user.getAnswer());
@@ -196,7 +197,7 @@ public class UserServiceImpl implements IUserService {
 
         resultCount = userMapper.updateByPrimaryKeySelective(updateuser);
         if (resultCount>0){
-            return ServiceResponse.createBySuccess("修改成功",user);
+            return ServiceResponse.createBySuccessMessage("修改成功");
         }
        return ServiceResponse.createByErrorMessage("修改失败");
     }
@@ -228,6 +229,7 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
         }
 
+        //登录信息进行验证
         User user1 = userMapper.selectByPrimaryKey(user.getId());
         if (user1==null){
             ServiceResponse.createByErrorMessage("用户不存在");

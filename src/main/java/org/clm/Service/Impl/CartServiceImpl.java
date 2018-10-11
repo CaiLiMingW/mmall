@@ -46,7 +46,7 @@ public class CartServiceImpl implements ICartService {
 
 
         if( productMapper.selectByPrimaryKey(productId)==null){
-            return ServiceResponse.createByErrorMessage("该商品部存在");
+            return ServiceResponse.createByErrorMessage("该商品不存在");
         }
         if(cart==null){
             Cart newcart = new Cart();

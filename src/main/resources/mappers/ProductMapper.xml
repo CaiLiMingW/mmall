@@ -35,7 +35,7 @@
       <include refid="View"/>
       from mmall_product
     </select>
-  <select id="selectByIdAndName" resultType="Product" parameterType="Product">
+  <select id="selectByIdAndName" resultType="Product" parameterType="map">
     select
     <include refid="View"/>
     from mmall_product

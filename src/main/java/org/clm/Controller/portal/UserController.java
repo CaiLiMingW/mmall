@@ -116,6 +116,13 @@ public class UserController {
         return iUserService.selectQuestion(username);
     }
 
+    /**
+     * 忘记密码问题找回
+     * @param username 账号
+     * @param question 问题
+     * @param answer   密码
+     * @return
+     */
     @RequestMapping(value ="/forget_check_answer.do" ,method =RequestMethod.POST )
     public ServiceResponse<String> forgetCheckAnswer(String username,String question,String answer){
         return iUserService.checkAnswer(username,question,answer);
@@ -125,17 +132,22 @@ public class UserController {
     public ServiceResponse<String> forgetRestPassword(String username,String passwordNew,String forgetToken){
         return iUserService.forgetrestPassword(username,passwordNew,forgetToken);
     }
+
     //todo
     @RequestMapping(value ="/reset_password.do" ,method =RequestMethod.POST )
-    public ServiceResponse<String> resetPassword(String passwordOld,String passwordNew,HttpSession session){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        return iUserService.restPassword(passwordOld,passwordNew,user);
-    }
-    @RequestMapping(value ="/update_information.do" ,method =RequestMethod.POST )
-    public ServiceResponse<User> updateInfomation(HttpServletRequest request,User user){
+    public ServiceResponse resetPassword(String passwordOld,String passwordNew,HttpServletRequest request){
         ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
         if (response.isSuccess()){
-            return iUserService.updateInfomation(response.getData());
+            return iUserService.restPassword(passwordOld,passwordNew,response.getData());
+        }
+        return response;
+    }
+    @RequestMapping(value ="/update_information.do" ,method =RequestMethod.POST )
+    public ServiceResponse updateInfomation(HttpServletRequest request,User updateuser){
+        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
+        updateuser.setId(response.getData().getId());
+        if (response.isSuccess()){
+            return iUserService.updateInfomation(updateuser);
         }
         return response;
     }

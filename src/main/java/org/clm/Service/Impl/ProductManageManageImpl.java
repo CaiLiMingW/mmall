@@ -37,19 +37,28 @@ public class ProductManageManageImpl implements IProductManageService {
 
     @Override
     public ServiceResponse saveOrUpdateProduct(Product product) {
+
         if(product.getId()!=null){
+            //所有图片信息清空时,主页面图片也清空
+            if (StringUtils.isBlank(product.getSubImages())){
+                product.setMainImage("");
+            }
             int i = productMapper.updateByPrimaryKeySelective(product);
             if(i>0){
-                return ServiceResponse.createBySuccessMessage("新增产品成功");
+                return ServiceResponse.createBySucces("更新产品成功");
             }
-            return ServiceResponse.createByErrorMessage("新增产品成功");
+            return ServiceResponse.createByError("更新产品失败");
         }
 
+        //设置第一张图主页
+        if (product.getMainImage()==null){
+            product.setMainImage(product.getSubImages());
+        }
         int resultCount = productMapper.insertSelective(product);
         if(resultCount >0){
-            return ServiceResponse.createBySuccessMessage("更新产品成功");
+            return ServiceResponse.createBySucces("新增产品成功");
         }
-        return ServiceResponse.createByErrorMessage("更新产品失败");
+        return ServiceResponse.createByError("新增产品失败");
     }
 
     @Override
@@ -63,7 +72,7 @@ public class ProductManageManageImpl implements IProductManageService {
         for (Product product : list) {
             ProductListVo productListVo = new ProductListVo();
             BeanUtils.copyProperties(product,productListVo);
-            productListVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://img.happymmall.com/"));
+            productListVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://120.78.128.136/"));
             productListVolist.add(productListVo);
         }
 
@@ -109,17 +118,17 @@ public class ProductManageManageImpl implements IProductManageService {
 
     @Override
     public ServiceResponse<PageInfo> searchProductByIdAndName(String productName, Integer productId, int pageNum, int pageSize) {
-        if (StringUtils.isBlank(productName)){
-            return ServiceResponse.createByErrorMessage("搜索参数为空");
-        }
-        productName=new StringBuffer().append("%").append(productName).append("%").toString();
+       /**#｛%productName%｝防注入*/
+       if(!StringUtils.isBlank(productName)){
+           productName=new StringBuffer().append("%").append(productName).append("%").toString();
+       }
         PageHelper.startPage(pageNum,pageSize);
         List<Product> list = productMapper.selectByIdAndName(productName,productId);
         List<ProductListVo> productListVolist = new ArrayList<>();
         for (Product product : list) {
             ProductListVo productListVo = new ProductListVo();
             BeanUtils.copyProperties(product,productListVo);
-            productListVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://img.happymmall.com/"));
+            productListVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://120.78.128.136/"));
             productListVolist.add(productListVo);
         }
 
@@ -134,7 +143,7 @@ public class ProductManageManageImpl implements IProductManageService {
     private ProductDetailVo copy(Product product){
         ProductDetailVo productDetailVo = new ProductDetailVo();
         BeanUtils.copyProperties(product,productDetailVo);
-        productDetailVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://img.happymmall.com/"));
+        productDetailVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix","http://120.78.128.136/"));
 
         Category category = categoryMapper.selectById(product.getCategoryId());
         if(category == null){

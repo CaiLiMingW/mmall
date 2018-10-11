@@ -3,10 +3,10 @@ package org.clm.common;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * @author Ccc
@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  */
 public class TokenCache {
 
-    private static Logger logger = (Logger) LoggerFactory.getLogger(TokenCache.class);
+    private static Logger log = LoggerFactory.getLogger(TokenCache.class);
 
     //LRU算法
     private static LoadingCache<String,String> loaclCache = CacheBuilder.newBuilder().initialCapacity(1000).maximumSize(10000).expireAfterAccess(12, TimeUnit.HOURS)
@@ -38,6 +38,7 @@ public class TokenCache {
             }
             return value;
         }catch (Exception e){
+            log.error("localCache get error",e);
         }
         return null;
     }

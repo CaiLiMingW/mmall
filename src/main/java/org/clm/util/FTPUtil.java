@@ -28,9 +28,9 @@ public class FTPUtil {
     }
     public static boolean uploadFile(List<File> fileList) throws IOException {
         FTPUtil ftpUtil = new FTPUtil(ftpIp,21,ftpUser,ftpPass);
-        logger.info("开始连接ftp服务器");
-        boolean result = ftpUtil.uploadFile("img",fileList);
-        logger.info("开始连接ftp服务器,结束上传,上传结果:{}");
+        logger.info("==========开始连接ftp服务器==========");
+        boolean result = ftpUtil.uploadFile("image",fileList);
+        logger.info("==========开始连接ftp服务器,结束上传,上传结果:{}==========",result);
         return result;
     }
 
@@ -41,7 +41,9 @@ public class FTPUtil {
         //连接FTP服务器
         if(connectServer(this.ip,this.port,this.user,this.pwd)){
             try {
-                ftpClient.changeWorkingDirectory(remotePath);
+                //改变工作目录,上传目录
+                boolean b = ftpClient.changeWorkingDirectory(remotePath);
+                logger.info("设置上传目录/home/clm/{}:{},",remotePath,b);
                 ftpClient.setBufferSize(1024);
                 ftpClient.setControlEncoding("UTF-8");
                 ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
@@ -72,6 +74,7 @@ public class FTPUtil {
         try {
             ftpClient.connect(ip);
             isSuccess = ftpClient.login(user,pwd);
+
         } catch (IOException e) {
             logger.error("连接FTP服务器异常",e);
         }

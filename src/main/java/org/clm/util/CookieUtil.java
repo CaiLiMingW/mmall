@@ -1,6 +1,7 @@
 package org.clm.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.Cookie;
@@ -12,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
  * @date 2018/10/10 0010 上午 10:28
  */
 public class CookieUtil {
-
+    private static  final Logger log = LoggerFactory.getLogger(CookieUtil.class);
 
     private final static  String COOKIE_DOMAIN = "";
 
@@ -23,7 +24,7 @@ public class CookieUtil {
         if (cookies!=null){
             for (Cookie cookie : cookies) {
                 if (StringUtils.equals(cookie.getName(),COOKIE_NAME)){
-                    System.out.println("返回cookie-Name:"+cookie.getName()+":Value:"+cookie.getValue());
+                    log.info("==========读取Cookie==========\n{}\n",cookie.getValue());
                     return cookie.getValue();
                 }
             }
@@ -46,8 +47,7 @@ public class CookieUtil {
         cookie.setHttpOnly(true);
         /**-1代表永久 调用方法会使cookie写入硬盘*/
         cookie.setMaxAge(60*60*24*365);
-
-        System.out.println("写入cookie-Name:"+cookie.getName()+"Value:"+cookie.getValue());
+        log.info("\n==========写入Cookie==========\n{}\n==========CookieValue==========\n{}\n",cookie.getName(),cookie.getValue());
         response.addCookie(cookie);
     }
 
@@ -59,7 +59,8 @@ public class CookieUtil {
                 if(StringUtils.equals(cookie.getName(),COOKIE_NAME)){
                     cookie.setPath("/");
                     /**年龄为0 即删除*/
-                    System.out.println("删除cookie-Name:"+cookie.getName()+":Value:"+cookie.getValue());
+                    log.info("\n==========删除Cookie==========\n{}\n" +
+                            "==========CookieValue==========\n{}\n",cookie.getName(),cookie.getValue());
                     cookie.setMaxAge(0);
                     response.addCookie(cookie);
                     return;
