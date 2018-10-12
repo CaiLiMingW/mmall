@@ -262,7 +262,8 @@ public class UserServiceImpl implements IUserService {
         if (StringUtils.isEmpty(sessionId)){
             return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"用户登录已过期,无法获取用户信息");
         }
-        //从redis获取登录用户信息
+
+        //从redis获取登录用户信息x
         String userJsonStr = RedisPoolUtil.get(sessionId);
         User user = JsonUtil.StringToObj(userJsonStr, User.class);
         if (user==null){
