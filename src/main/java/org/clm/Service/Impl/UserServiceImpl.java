@@ -42,12 +42,12 @@ public class UserServiceImpl implements IUserService {
         if(resultCount ==0){
             return ServiceResponse.createByErrorMessage("用户名不存在");
         }
-        /**验证密码*/
+        /**验证密码1*/
         User user = userMapper.selectLogin(username, password);
         if(user==null){
             return ServiceResponse.createByErrorMessage("密码错误");
         }
-        user.setPassword(StringUtils.EMPTY);
+
         return ServiceResponse.createBySuccess("登录成功",user);
     }
 
@@ -242,34 +242,33 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public ServiceResponse<User> checkUserLogin(HttpSession session) {
-        String str = RedisPoolUtil.get(session.getId());
-        if (str==null){
-            return ServiceResponse.createByErrorMessage("用户未登录");
+    public ServiceResponse<User> checkUserLoginUnNeedLogin(HttpServletRequest request) {
+        String sessionId = CookieUtil.readLoginToken(request);
+        if (StringUtils.isBlank(sessionId)){
+            return ServiceResponse.createByErrorMessage("登录已超时");
         }
-        User user = JsonUtil.StringToObj(str, User.class);
+        String userJsonStr = RedisPoolUtil.get(sessionId);
+        User user = JsonUtil.StringToObj(userJsonStr, User.class);
         if (user==null){
-            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
+            return ServiceResponse.createByErrorMessage("用户信息出错，请重新登录");
         }
         return ServiceResponse.createBySucces(user);
     }
 
     @Override
     public ServiceResponse<User> checkUserLoginCookie(HttpServletRequest request) {
-        //从
         String sessionId = CookieUtil.readLoginToken(request);
         //判断redis中sessionID是否过期
         if (StringUtils.isEmpty(sessionId)){
-            return ServiceResponse.createByErrorMessage("用户登录时间已过期,无法获取用户信息");
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"用户登录已过期,无法获取用户信息");
         }
-        String str = RedisPoolUtil.get(sessionId);
-        if (str==null){
-            return ServiceResponse.createByErrorMessage("用户未登录");
-        }
-        User user = JsonUtil.StringToObj(str, User.class);
+        //从redis获取登录用户信息
+        String userJsonStr = RedisPoolUtil.get(sessionId);
+        User user = JsonUtil.StringToObj(userJsonStr, User.class);
         if (user==null){
-            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"请登录");
         }
+
         return ServiceResponse.createBySucces(user);
     }
 

@@ -41,11 +41,7 @@ public class ProductController {
                                             @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                             @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize,
                                             @RequestParam(value = "orderBy",defaultValue = "")String orderBy){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
             return iProductService.getProductList(categoryId,pageNum,pageSize,keyword,orderBy);
-        }
-        return response;
     }
 
 }
