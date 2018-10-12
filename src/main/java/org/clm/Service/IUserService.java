@@ -31,7 +31,7 @@ public interface IUserService {
 
     ServiceResponse checkAdminRole(HttpServletRequest request);
 
-    ServiceResponse<User> checkUserLogin(HttpSession session);
+    ServiceResponse<User> checkUserLoginUnNeedLogin(HttpServletRequest request);
 
     ServiceResponse<User> checkUserLoginCookie(HttpServletRequest request);
 }

@@ -53,6 +53,8 @@ public class UserController {
             CookieUtil.writeLoginToken(responseCookie,session.getId());
             RedisPoolUtil.setEx(session.getId(), JsonUtil.objToString(response.getData()),
                                 Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+            //密码清空
+            response.getData().setPassword(StringUtils.EMPTY);
         }
         return response;
     }
@@ -101,8 +103,7 @@ public class UserController {
      */
     @RequestMapping(value ="/get_user_info.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> getUserInfo(HttpServletRequest request){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-
+        ServiceResponse<User> response = iUserService.checkUserLoginUnNeedLogin(request);
         return response;
     }
 

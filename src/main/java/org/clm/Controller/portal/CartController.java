@@ -107,7 +107,7 @@ public class CartController {
     @RequestMapping("/get_cart_product_count.do")
     public ServiceResponse getCartProductcount(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
+        ServiceResponse<User> response = iUserService.checkUserLoginUnNeedLogin(request);
         if (response.isSuccess()){
             return iCartService.selectCartProductCount(response.getData());
         }
