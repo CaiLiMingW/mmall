@@ -19,12 +19,20 @@ public class CookieUtil {
 
     private final static  String COOKIE_NAME = "login_token";
 
+    /**
+     *
+     * @param request
+     * @return
+     */
     public static String readLoginToken(HttpServletRequest request){
+        //从request请求中得到cookie[];
         Cookie[] cookies = request.getCookies();
+
         if (cookies!=null){
+            //遍历cookie,获取key为COOKIE_NAME的值
             for (Cookie cookie : cookies) {
                 if (StringUtils.equals(cookie.getName(),COOKIE_NAME)){
-                    log.info("==========读取Cookie==========\n{}\n",cookie.getValue());
+                    log.info("==========CookieValue==========\n{}\n",cookie.getValue());
                     return cookie.getValue();
                 }
             }
@@ -38,30 +46,39 @@ public class CookieUtil {
      * @param token
      */
     public static void writeLoginToken(HttpServletResponse response,String token){
+
+        //cookie,Name Value
         Cookie cookie = new Cookie(COOKIE_NAME,token);
 
        /* cookie.setDomain(".admin.clm.com");*//**跨域共享session,*/
-        /**设置在根目录,使用服务器所有应用都可获取该cookies*/
+
+       //设置在tomcat根目录,使用服务器所有应用都可获取该cookies
         cookie.setPath("/");
-        /**不允许通过脚本访问cookies*/
+
+        //不允许通过脚本访问cookies
         cookie.setHttpOnly(true);
-        /**-1代表永久 调用方法会使cookie写入硬盘*/
+
+        //设置cookie生存期,-1代表永久 调用setMaxAge方法会使cookie写入硬盘
         cookie.setMaxAge(60*60*24*365);
         log.info("\n==========写入Cookie==========\n{}\n==========CookieValue==========\n{}\n",cookie.getName(),cookie.getValue());
+
+        //设置cookie之后,通过HttpServletResponse将cookie添加到用户浏览器
         response.addCookie(cookie);
     }
 
     public static void
     delLoginToken(HttpServletRequest request,HttpServletResponse response){
         Cookie[] cookies = request.getCookies();
+        //删除名字为COOKIE_NAME的cookie
         if (cookies!=null){
             for (Cookie cookie : cookies) {
                 if(StringUtils.equals(cookie.getName(),COOKIE_NAME)){
                     cookie.setPath("/");
-                    /**年龄为0 即删除*/
                     log.info("\n==========删除Cookie==========\n{}\n" +
                             "==========CookieValue==========\n{}\n",cookie.getName(),cookie.getValue());
+                    //设置年龄为0，即删除
                     cookie.setMaxAge(0);
+                    //返回给浏览器
                     response.addCookie(cookie);
                     return;
                 }

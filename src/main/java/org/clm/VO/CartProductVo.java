@@ -23,7 +23,6 @@ public class CartProductVo extends Cart {
     private BigDecimal productTotalPrice;
     private String limitQuantity;//限制数量的一个返回结果
 
-
     public String getLimitQuantity() {
         return limitQuantity;
     }

@@ -21,7 +21,8 @@ public class FileServiceImpl implements IFileService {
     private Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
 
     @Override
-    public String upload(MultipartFile file,String path){
+    public String
+    upload(MultipartFile file,String path){
         //获取文件名
         String fileName = file.getOriginalFilename();
         //扩展名

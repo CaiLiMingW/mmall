@@ -256,7 +256,9 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServiceResponse<User> checkUserLoginCookie(HttpServletRequest request) {
+        //从
         String sessionId = CookieUtil.readLoginToken(request);
+        //判断redis中sessionID是否过期
         if (StringUtils.isEmpty(sessionId)){
             return ServiceResponse.createByErrorMessage("用户登录时间已过期,无法获取用户信息");
         }

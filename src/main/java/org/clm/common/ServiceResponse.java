@@ -13,28 +13,31 @@ import java.io.Serializable;
  * @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
  * @JsonInclude(JsonInclude.Include.NON_NULL)
  * 序列化json时,Null的对象，Key也会消失
+ * class ServiceResponse<T> :泛型类，参数类型由传入参数确定
  */
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class ServiceResponse<T> implements Serializable {
 
+    /** status:0:成功 1:失败 10：强制登录 */
     private int status;
-    private String msg;
-    private  T data;
 
-    /**
-     * 私有化构造器
-     * @param status
-     */
+    /**  msg:返回消息 */
+    private String msg;
+
+    /** T：对象类型，由传入参数指定 */
+    private T data;
+
+    /** 私有化构造器 ,只能通过内部方法创建该对象，不是单例，线程安全*/
     private ServiceResponse(int status){
         this.status = status;
     }
+    private ServiceResponse(){}
 
     private ServiceResponse(int status, T data) {
         this.status = status;
         this.data = data;
     }
-
     private ServiceResponse(int status, String msg, T data) {
         this.status = status;
         this.msg = msg;
@@ -49,6 +52,7 @@ public class ServiceResponse<T> implements Serializable {
     /**不在Json序列化结果当中 @JsonIgnore*/
     @JsonIgnore
     public boolean isSuccess(){
+        //如果当前类status==0 返回true
         return this.status==ResponseCode.SUCCESS.getCode();
     }
 
@@ -63,8 +67,11 @@ public class ServiceResponse<T> implements Serializable {
     public T getData() {
         return data;
     }
+    //static静态方法:对象可以直接引用,可以使用类名直接访问,无需new对象后再使用该方法
+    //静态泛型方法:参数类型T 由传入参数T data 指定
+    //通过静态方法方法创建ServiceResponse对象 并由传入的实际参数确定泛型类型，提高类的可复用性
 
-    /**创建ServiceResponse*/
+    /**创建ServiceResponse status=0*/
     public static <T> ServiceResponse<T> createBySuccess(){
         return new ServiceResponse<T>(ResponseCode.SUCCESS.getCode());
     }

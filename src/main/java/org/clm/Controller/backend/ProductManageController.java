@@ -95,7 +95,7 @@ public class ProductManageController {
     public ServiceResponse upload(@RequestParam(value = "upload_file",required = false) MultipartFile file, HttpServletRequest request){
         ServiceResponse response = iUserService.checkAdminRole(request);
         if (response.isSuccess()){
-
+            //获取应用的绝对路径
             String path = request.getSession().getServletContext().getRealPath("upload");
             String targetFileName = iFileService.upload(file,path);
             String url = PropertiesUtil.getProperty("ftp.server.http.prefix")+targetFileName;
