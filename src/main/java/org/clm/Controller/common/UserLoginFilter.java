@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
+/** 登录认证自定义F
  * @author Ccc
  * @date 2018/10/13 0013 下午 10:39
  */
@@ -30,37 +30,22 @@ public class UserLoginFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String requestURI = request.getRequestURI();
-
+        User user = null;
         /**不需要登录权限的请求,放行，进入下一个逻辑*/
-        if("/user/login.do".equals(requestURI)||"/product/list.do".equals(requestURI)){
-            filterChain.doFilter(servletRequest,servletResponse);
-        }
-
-
-        String sessionId = CookieUtil.readLoginToken(request);
-        if(StringUtils.isBlank(sessionId)){
-            /**需要登录权限，且不需强制登录的请求,*/
-            if ("/user/get_user_info.do".equals(requestURI)|| "/cart/get_cart_product_count.do".equals(requestURI)){
-                response.setHeader("refresh","2;/unNeedLogin");
+        if(!("/clm/user/login.do".equals(requestURI)||"/clm/product/list.do".equals(requestURI))){
+            String sessionId = CookieUtil.readLoginToken(request);
+            if(StringUtils.isBlank(sessionId)){
+                this.refresh(servletRequest,servletResponse);
                 return;
             }
 
-            response.setHeader("refresh","2;/needLogin");
-            return;
-        }
-
-        String userJsonStr = ShardedPoolUtil.get(sessionId);
-        User user = JsonUtil.StringToObj(userJsonStr, User.class);
-        if (user==null){
-            if ("/user/get_user_info.do".equals(requestURI)|| "/cart/get_cart_product_count.do".equals(requestURI)){
-                response.setHeader("refresh","2;/unNeedLogin");
+            String userJsonStr = ShardedPoolUtil.get(sessionId);
+            user = JsonUtil.StringToObj(userJsonStr, User.class);
+            if (user==null){
+                this.refresh(servletRequest,servletResponse);
                 return;
             }
-
-            response.setHeader("refresh","2;/needLogin");
-            return;
         }
-
         //确定用户已登录,把用户信息放到request，并进入下一个Filter.
         servletRequest.setAttribute("user",user);
         filterChain.doFilter(servletRequest,servletResponse);
@@ -70,16 +55,18 @@ public class UserLoginFilter implements Filter {
     public void destroy() {
 
     }
-    private void refresh(HttpServletRequest request,HttpServletResponse response){
+    private void refresh(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
         String requestURI = request.getRequestURI();
 
         //判断请求的页面是否属于需要强制登录
-        if ("/user/get_user_info.do".equals(requestURI)|| "/cart/get_cart_product_count.do".equals(requestURI)){
-            response.setHeader("refresh","2;/unNeedLogin");
+        //注意:线上服务器路径需加上项目名前缀/clm
+        if ("/clm/user/get_user_info.do".equals(requestURI)|| "/clm/cart/get_cart_product_count.do".equals(requestURI)){
+            servletRequest.getRequestDispatcher("/unNeedLogin").forward(servletRequest,servletResponse);
             return;
         }
 
-        response.setHeader("refresh","2;/needLogin");
+        servletRequest.getRequestDispatcher("/needLogin").forward(servletRequest,servletResponse);
         return;
     }
 }
