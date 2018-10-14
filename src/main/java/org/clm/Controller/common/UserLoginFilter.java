@@ -31,7 +31,6 @@ public class UserLoginFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String requestURI = request.getRequestURI();
         User user = null;
-        /**不需要登录权限的请求,放行，进入下一个逻辑*/
         if(!("/clm/user/login.do".equals(requestURI)||"/clm/product/list.do".equals(requestURI))){
             String sessionId = CookieUtil.readLoginToken(request);
             if(StringUtils.isBlank(sessionId)){
