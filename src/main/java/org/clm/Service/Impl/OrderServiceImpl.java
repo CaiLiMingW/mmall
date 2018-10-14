@@ -211,6 +211,7 @@ public class OrderServiceImpl implements IOrderService {
     public ServiceResponse alipayCallback(HttpServletRequest request) {
         Map<String,String> params = Maps.newHashMap();
 
+        //获取返回的参数map
         Map<String, String[]> requestParameterMap = request.getParameterMap();
         /**
          * s：key值

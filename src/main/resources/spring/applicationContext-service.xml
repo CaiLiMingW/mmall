@@ -7,7 +7,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
-	<context:component-scan base-package="org.clm.Service.Impl"  use-default-filters="false">
+	<context:component-scan base-package="org.clm.Service.Impl"  use-default-filters="false" annotation-config="true" >
 		<!-- 只扫描service包 -->
 		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
 	</context:component-scan>
@@ -23,6 +23,6 @@
 	<tx:annotation-driven transaction-manager="tx" />
     <!--proxy-target-class="true"-->
 	<!--开启基于注解的事务，使用xml配置形式的事务（必要主要的都是使用配置式）  -->
-	<!-- Spring配置文件的核心点（数据源、与mybatis的整合，事务控制） -->
+
 	
 </beans>

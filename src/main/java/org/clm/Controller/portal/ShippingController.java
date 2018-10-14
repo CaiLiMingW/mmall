@@ -7,7 +7,7 @@ import org.clm.Service.IUserService;
 import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
 import org.clm.util.JsonUtil;
-import org.clm.util.RedisPoolUtil;
+import org.clm.util.ShardedPoolUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,50 +29,37 @@ public class ShippingController {
 
     @RequestMapping("/add.do")
     public ServiceResponse addShipping(HttpServletRequest request, Shipping shipping){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if(response.isSuccess()){
-            return iShippingService.addShipping(response.getData(),shipping);
-        }
-        return response;
+
+        User user = (User)request.getAttribute("user");
+        return iShippingService.addShipping(user,shipping);
     }
 
     @RequestMapping("/del.do")
     public ServiceResponse delShipping(HttpServletRequest request, Integer shippingId){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if(response.isSuccess()){
-            return iShippingService.deleteShipping(response.getData(),shippingId);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+            return iShippingService.deleteShipping(user,shippingId);
     }
 
     @RequestMapping("/update.do")
     public ServiceResponse updateShipping(HttpServletRequest request, Shipping shipping){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if(response.isSuccess()){
-            return iShippingService.updateShipping(response.getData(),shipping);
-        }
-        return response;
+
+        User user = (User)request.getAttribute("user");
+        return iShippingService.updateShipping(user,shipping);
     }
 
     @RequestMapping("/select.do")
     public ServiceResponse selectShipping(HttpServletRequest request, Integer shippingId){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if(response.isSuccess()){
-            return iShippingService.selectShipping(response.getData(),shippingId);
-        }
-        return response;
+
+        User user = (User)request.getAttribute("user");
+        return iShippingService.selectShipping(user,shippingId);
+
     }
 
     @RequestMapping("/list.do")
     public ServiceResponse getShippingList(HttpServletRequest request,
                                            @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                            @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        String sessionId = CookieUtil.readLoginToken(request);
-        String userJsonStr = RedisPoolUtil.get(sessionId);
-        User user = JsonUtil.StringToObj(userJsonStr, User.class);
-        if(user == null){
-            return ServiceResponse.createByErrorMessage("请登录之后查询");
-        }
+        User user = (User)request.getAttribute("user");
         return iShippingService.getShippingList(user,pageNum,pageSize);
 
     }

@@ -10,6 +10,16 @@
         <param-value>classpath:spring/applicationContext.xml</param-value>
     </context-param>
 
+    <!-- 重置session时间的filter,每次*.do都将访问重复seesion生存期  @WebFilter注解或xml注解二选一 -->
+    <!--<filter>
+        <filter-name>SessionExpireFilter</filter-name>
+        <filter-class>org.clm.Controller.common.SessionExpireFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SessionExpireFilter</filter-name>
+        <url-pattern>*.do</url-pattern>
+    </filter-mapping>-->
+
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>

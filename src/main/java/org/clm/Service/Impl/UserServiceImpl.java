@@ -1,23 +1,19 @@
 package org.clm.Service.Impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.clm.Dao.CategoryMapper;
 import org.clm.Dao.UserMapper;
 import org.clm.Pojo.User;
 import org.clm.Service.IUserService;
 import org.clm.common.Const;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
-import org.clm.common.TokenCache;
 import org.clm.util.CookieUtil;
 import org.clm.util.JsonUtil;
-import org.clm.util.RedisPoolUtil;
+import org.clm.util.ShardedPoolUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.UUID;
 
 /**
@@ -142,7 +138,7 @@ public class UserServiceImpl implements IUserService {
         if(resultCount > 0){
             /**问题答案正确*/
             String forgetToken = UUID.randomUUID().toString();
-            TokenCache.setkey("token_"+username,forgetToken);
+            ShardedPoolUtil.setEx("token_"+username,forgetToken,Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
             return ServiceResponse.createBySucces(forgetToken);
         }
         return ServiceResponse.createByErrorMessage("答案错误");
@@ -153,7 +149,7 @@ public class UserServiceImpl implements IUserService {
         if(StringUtils.isBlank(fotgetToken)){
             return ServiceResponse.createByErrorMessage("参数错误，token为空");
         }
-        String token = TokenCache.getkey("token_"+username);
+        String token = ShardedPoolUtil.get("token_"+username);
         if(StringUtils.isBlank(token)){
             return ServiceResponse.createByErrorMessage("Token无效或已过期");
         }
@@ -219,7 +215,7 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByErrorMessage("用户登录时间已过期,无法获取用户信息");
         }
         /**根据sessionId从Redis获取当前登录用户信息的json字符串*/
-        String str = RedisPoolUtil.get(sessionId);
+        String str = ShardedPoolUtil.get(sessionId);
         if (str==null){
             return ServiceResponse.createByErrorMessage("用户未登录");
         }
@@ -245,29 +241,29 @@ public class UserServiceImpl implements IUserService {
     public ServiceResponse<User> checkUserLoginUnNeedLogin(HttpServletRequest request) {
         String sessionId = CookieUtil.readLoginToken(request);
         if (StringUtils.isBlank(sessionId)){
-            return ServiceResponse.createByErrorMessage("登录已超时");
+            return ServiceResponse.createByErrorMessage("未登录status=1");
         }
-        String userJsonStr = RedisPoolUtil.get(sessionId);
+        String userJsonStr = ShardedPoolUtil.get(sessionId);
         User user = JsonUtil.StringToObj(userJsonStr, User.class);
         if (user==null){
-            return ServiceResponse.createByErrorMessage("用户信息出错，请重新登录");
+            return ServiceResponse.createByErrorMessage("用户信息出错，请重新登录status=1");
         }
         return ServiceResponse.createBySucces(user);
     }
 
     @Override
-    public ServiceResponse<User> checkUserLoginCookie(HttpServletRequest request) {
+    public ServiceResponse<User>    checkUserLoginCookie(HttpServletRequest request) {
         String sessionId = CookieUtil.readLoginToken(request);
         //判断redis中sessionID是否过期
         if (StringUtils.isEmpty(sessionId)){
-            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"用户登录已过期,无法获取用户信息");
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,无法获取用户信息");
         }
 
         //从redis获取登录用户信息
-        String userJsonStr = RedisPoolUtil.get(sessionId);
+        String userJsonStr = ShardedPoolUtil.get(sessionId);
         User user = JsonUtil.StringToObj(userJsonStr, User.class);
         if (user==null){
-            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"请登录");
+            return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"登录已超时，请重新登录");
         }
 
         return ServiceResponse.createBySucces(user);

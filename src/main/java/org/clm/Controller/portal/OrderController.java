@@ -46,50 +46,35 @@ public class OrderController {
 
     @RequestMapping("/create.do")
     public ServiceResponse createOrder(HttpServletRequest request,Integer shippingId){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iOrderService.createOrder(response.getData().getId(),shippingId);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iOrderService.createOrder(user.getId(),shippingId);
     }
 
     @RequestMapping("/get_order_cart_product.do")
     public ServiceResponse getOrderCartProduct(HttpServletRequest request){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iOrderService.getOrderProduct(response.getData().getId());
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iOrderService.getOrderProduct(user.getId());
     }
 
     @RequestMapping("/list.do")
     public ServiceResponse getOrderList(HttpServletRequest request,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iOrderService.getOrderListByUserId(response.getData().getId(),pageNum,pageSize);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iOrderService.getOrderListByUserId(user.getId(),pageNum,pageSize);
     }
 
 
     @RequestMapping("/detail.do")
     public ServiceResponse getOrderDeatil(HttpServletRequest request,Long orderNo){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iOrderService.getOrderDeatilByOrderNo(response.getData().getId(),orderNo);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iOrderService.getOrderDeatilByOrderNo(user.getId(),orderNo);
     }
 
     @RequestMapping("/cancel.do")
     public ServiceResponse cancelOrder(HttpServletRequest request,Long orderNo){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iOrderService.cancelOrderByOrderNo(response.getData().getId(),orderNo);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iOrderService.cancelOrderByOrderNo(user.getId(),orderNo);
     }
 
 
@@ -103,12 +88,9 @@ public class OrderController {
 
     @RequestMapping("/pay.do")
     public ServiceResponse pay(Long orderNo, HttpServletRequest request){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
+        User user = (User)request.getAttribute("user");
         String path = request.getSession().getServletContext().getRealPath("upload");
-        if (response.isSuccess()){
-            return iOrderService.pay(orderNo,response.getData().getId(),path);
-        }
-        return response;
+        return iOrderService.pay(orderNo,user.getId(),path);
     }
 
     @RequestMapping("/alipay_callback.do")
@@ -122,10 +104,7 @@ public class OrderController {
 
     @RequestMapping("/query_order_pay_status.do")
     public ServiceResponse queryOrderPayStatus(HttpServletRequest request , Long orderNo){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iOrderService.getOrderPayStatus(orderNo);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iOrderService.getOrderPayStatus(orderNo);
     }
 }

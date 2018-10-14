@@ -29,88 +29,64 @@ public class CartController {
 
     @RequestMapping("/add.do")
     public ServiceResponse add(HttpServletRequest request, Integer productId, Integer count){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if(response.isSuccess()){
-            return iCartService.addCartProduct(response.getData(),productId,count);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iCartService.addCartProduct(user,productId,count);
+
     }
 
     @RequestMapping("/update.do")
     public ServiceResponse updateCart(HttpServletRequest request,Integer productId,Integer count){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if(response.isSuccess()){
-            return iCartService.updateCart(response.getData(),productId,count);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iCartService.updateCart(user,productId,count);
     }
 
     @RequestMapping("/delete_product.do")
     public ServiceResponse deleteProductCart(HttpServletRequest request,String productIds){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if(response.isSuccess()){
-            return iCartService.deleteCartProduct(response.getData(),productIds);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+            return iCartService.deleteCartProduct(user,productIds);
     }
 
     @RequestMapping("/list.do")
     public ServiceResponse getCartList(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-           return iCartService.getCartProductList(response.getData());
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iCartService.getCartProductList(user);
     }
 
     @RequestMapping("/select_all.do")
     public ServiceResponse chooseAll(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iCartService.updateCheck(response.getData(), Const.Cart.CHECKED,null);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iCartService.updateCheck(user, Const.Cart.CHECKED,null);
     }
 
     @RequestMapping("/un_select_all.do")
     public ServiceResponse unchooseAll(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iCartService.updateCheck(response.getData(), Const.Cart.UN_CHECKED,null);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iCartService.updateCheck(user, Const.Cart.UN_CHECKED,null);
+
     }
 
     @RequestMapping("/un_select.do")
     public ServiceResponse unChooseOne(HttpServletRequest request,Integer productId){
 
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iCartService.updateCheck(response.getData(), Const.Cart.UN_CHECKED,productId);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+            return iCartService.updateCheck(user, Const.Cart.UN_CHECKED,productId);
     }
 
     @RequestMapping("/select.do")
     public ServiceResponse ChooseOne(HttpServletRequest request,Integer productId){
 
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iCartService.updateCheck(response.getData(), Const.Cart.CHECKED,productId);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+            return iCartService.updateCheck(user, Const.Cart.CHECKED,productId);
     }
 
     @RequestMapping("/get_cart_product_count.do")
     public ServiceResponse getCartProductcount(HttpServletRequest request){
 
-        ServiceResponse<User> response = iUserService.checkUserLoginUnNeedLogin(request);
-        if (response.isSuccess()){
-            return iCartService.selectCartProductCount(response.getData());
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iCartService.selectCartProductCount(user);
+
     }
 }

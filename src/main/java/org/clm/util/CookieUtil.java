@@ -32,7 +32,9 @@ public class CookieUtil {
             //遍历cookie,获取key为COOKIE_NAME的值
             for (Cookie cookie : cookies) {
                 if (StringUtils.equals(cookie.getName(),COOKIE_NAME)){
-                    log.info("==========CookieValue==========\n{}\n",cookie.getValue());
+                    log.info("\n==========读取==========\n{}\n",cookie.getValue());
+                    log.info("\n==========CookieName==========\n{}\n",cookie.getName());
+                    log.info("\n==========CookieValue==========\n{}\n",cookie.getValue());
                     return cookie.getValue();
                 }
             }
@@ -66,8 +68,7 @@ public class CookieUtil {
         response.addCookie(cookie);
     }
 
-    public static void
-    delLoginToken(HttpServletRequest request,HttpServletResponse response){
+    public static void delLoginToken(HttpServletRequest request,HttpServletResponse response){
         Cookie[] cookies = request.getCookies();
         //删除名字为COOKIE_NAME的cookie
         if (cookies!=null){

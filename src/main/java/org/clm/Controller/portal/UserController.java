@@ -10,7 +10,7 @@ import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
 import org.clm.util.JsonUtil;
-import org.clm.util.RedisPoolUtil;
+import org.clm.util.ShardedPoolUtil;
 import org.joda.time.YearMonth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -51,7 +51,7 @@ public class UserController {
              * 存入redis中 key= sessionId,Value = UserJsonString
              */
             CookieUtil.writeLoginToken(responseCookie,session.getId());
-            RedisPoolUtil.setEx(session.getId(), JsonUtil.objToString(response.getData()),
+            ShardedPoolUtil.setEx(session.getId(), JsonUtil.objToString(response.getData()),
                                 Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
             //密码清空
             response.getData().setPassword(StringUtils.EMPTY);
@@ -66,12 +66,9 @@ public class UserController {
      */
     @RequestMapping(value = "/logout.do",method = RequestMethod.POST)
     public ServiceResponse<User> outlogin(HttpServletResponse responseCookie,HttpServletRequest request){
-        CookieUtil.delLoginToken(request,responseCookie);
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
+            ShardedPoolUtil.del(request.getSession().getId());
+            CookieUtil.delLoginToken(request,responseCookie);
             return ServiceResponse.createBySuccess();
-        }
-        return ServiceResponse.createByErrorMessage("还未登录，何来退出");
     }
 
     /**
@@ -103,8 +100,8 @@ public class UserController {
      */
     @RequestMapping(value ="/get_user_info.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> getUserInfo(HttpServletRequest request){
-        ServiceResponse<User> response = iUserService.checkUserLoginUnNeedLogin(request);
-        return response;
+        User user = (User) request.getAttribute("user");
+        return ServiceResponse.createBySucces(user);
     }
 
     /**
@@ -137,28 +134,21 @@ public class UserController {
     //todo
     @RequestMapping(value ="/reset_password.do" ,method =RequestMethod.POST )
     public ServiceResponse resetPassword(String passwordOld,String passwordNew,HttpServletRequest request){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iUserService.restPassword(passwordOld,passwordNew,response.getData());
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        return iUserService.restPassword(passwordOld,passwordNew,user);
     }
+
     @RequestMapping(value ="/update_information.do" ,method =RequestMethod.POST )
     public ServiceResponse updateInfomation(HttpServletRequest request,User updateuser){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        updateuser.setId(response.getData().getId());
-        if (response.isSuccess()){
-            return iUserService.updateInfomation(updateuser);
-        }
-        return response;
+        User user = (User)request.getAttribute("user");
+        updateuser.setId(user.getId());
+        return iUserService.updateInfomation(updateuser);
     }
 
     @RequestMapping(value ="/get_information.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> getInfomation(HttpServletRequest request){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
-            return iUserService.getInfomation(response.getData().getId());
-        }
-       return response;
+        User user = (User)request.getAttribute("user");
+        return iUserService.getInfomation(user.getId());
     }
+
 }

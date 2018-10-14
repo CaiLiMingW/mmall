@@ -27,11 +27,7 @@ public class ProductController {
 
     @RequestMapping("/detail.do")
     public ServiceResponse getProductDetail(HttpServletRequest request,Integer productId){
-        ServiceResponse<User> response = iUserService.checkUserLoginCookie(request);
-        if (response.isSuccess()){
             return iProductService.getProductDetail(productId);
-        }
-        return response;
     }
 
     @RequestMapping("/list.do")
@@ -41,7 +37,8 @@ public class ProductController {
                                             @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                             @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize,
                                             @RequestParam(value = "orderBy",defaultValue = "")String orderBy){
-            return iProductService.getProductList(categoryId,pageNum,pageSize,keyword,orderBy);
+
+        return iProductService.getProductList(categoryId,pageNum,pageSize,keyword,orderBy);
     }
 
 }
