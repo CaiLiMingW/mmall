@@ -32,9 +32,8 @@ public class CookieUtil {
             //遍历cookie,获取key为COOKIE_NAME的值
             for (Cookie cookie : cookies) {
                 if (StringUtils.equals(cookie.getName(),COOKIE_NAME)){
-                    log.info("\n==========读取==========\n{}\n",cookie.getValue());
-                    log.info("\n==========CookieName==========\n{}\n",cookie.getName());
-                    log.info("\n==========CookieValue==========\n{}\n",cookie.getValue());
+                    log.info("\n==========从request读取Cookie==========\n{}\n",cookie.getName());
+                    log.info("\n=======================================\n{}\n",cookie.getValue());
                     return cookie.getValue();
                 }
             }

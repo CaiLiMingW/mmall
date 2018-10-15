@@ -43,7 +43,7 @@ public class SessionExpireFilter implements Filter {
             //放行,将请求转发给过滤器链上的下一个Filter，若无下个Filter，则进入Servlet
             filterChain.doFilter(servletRequest,servletResponse);
         }
-        System.out.println("doFilter后:服务器返回时执行");
+        /*System.out.println("doFilter后:服务器返回时执行");*/
 
 
     }

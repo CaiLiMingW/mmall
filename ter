@@ -1,0 +1,16 @@
+[33m01f959d[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;33mtag: v2.0[m[33m, [m[1;33mtag: v.10[m[33m, [m[1;31morigin/master[m[33m, [m[1;32mV2.0[m[33m)[m master@{0}: reset: moving to master@{2}
+[33m21b79f9[m[33m ([m[1;32mv1.3[m[33m)[m master@{1}: commit: redis添加密码 拦截器登录校验 授权
+[33mad5f7a4[m[33m ([m[1;32mv1.2[m[33m)[m master@{2}: merge v1.2: Fast-forward
+[33m01f959d[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;33mtag: v2.0[m[33m, [m[1;33mtag: v.10[m[33m, [m[1;31morigin/master[m[33m, [m[1;32mV2.0[m[33m)[m master@{3}: commit: v1.0
+[33m6726191[m master@{4}: commit: 富文本上传修改1011
+[33m007bd4b[m master@{5}: commit: redis session
+[33m9843bdf[m master@{6}: commit: redis session
+[33m1bbf0db[m master@{7}: commit: 11 3 订单list.do
+[33m4ea4109[m master@{8}: commit: 10-4 8章购物车功能
+[33m62a5d92[m master@{9}: commit: 9-30 文件上传父文本未做
+[33mbd73ad9[m master@{10}: commit: 9-29 18.28 品类管理模块 6
+[33m6dad7bf[m master@{11}: commit: 9-27 21:00 token 本地缓存未解决
+[33ma270111[m master@{12}: commit: 9-27中午 用户登录 注册 验证模块
+[33m09e804c[m master@{13}: commit: 9-26 23:00配置spring
+[33m838437c[m master@{14}: commit: 21.30配置spring
+[33m7655822[m master@{15}: commit (initial): 初始化mall
