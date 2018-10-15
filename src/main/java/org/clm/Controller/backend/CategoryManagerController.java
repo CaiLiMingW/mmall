@@ -36,32 +36,19 @@ public class CategoryManagerController {
 
     @RequestMapping(value = "/add_category.do",method = RequestMethod.GET)
     public ServiceResponse addCategory(HttpServletRequest request, String categoryName, @RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
-        ServiceResponse serviceResponse = iUserService.checkAdminRole(request);
-        if (serviceResponse.isSuccess()){
             return iCategoryManageService.addCategory(categoryName,parentId);
-        }
-        return serviceResponse;
-
     }
 
     @RequestMapping(value = "/set_category_name.do",method = RequestMethod.GET)
     public ServiceResponse setCategory(HttpServletRequest request,String categoryName,
                                        @RequestParam(value = "categoryId",defaultValue = "0")Integer categoryId){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
             return iCategoryManageService.setCategoryName(categoryName,categoryId);
-        }
-        return response;
     }
 
     @RequestMapping(value = "/get_deep_category.do",method = RequestMethod.GET)
     public ServiceResponse getChilerCategoryId(HttpServletRequest request,
                                                @RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if(response.isSuccess()){
             return iCategoryManageService.getAllChildCategoryById(categoryId);
-        }
-        return response;
     }
 
 }

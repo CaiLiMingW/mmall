@@ -29,38 +29,22 @@ public class OrderManageController {
     public ServiceResponse getOrderList(HttpServletRequest request,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
             return iOrderService.getOrderListByUserId(null,pageNum,pageSize);
-        }
-        return response;
     }
 
     @RequestMapping("/detail.do")
     public ServiceResponse getOrderList(HttpServletRequest request,Long orderNo){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
             return iOrderService.getOrderDeatilByOrderNo(null,orderNo);
-        }
-        return response;
     }
     @RequestMapping("/search.do")
     public ServiceResponse getOrderList(HttpServletRequest request, Long orderNo,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
             return iOrderService.searchByOrderNoKey(pageNum,pageSize,orderNo);
-        }
-        return response;
     }
 
     @RequestMapping("/send_goods.do")
     public ServiceResponse sendgoods(HttpServletRequest request,Long orderNo){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
             return iOrderService.sendgoods(orderNo);
-        }
-        return response;
     }
 }

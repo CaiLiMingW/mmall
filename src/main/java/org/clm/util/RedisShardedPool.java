@@ -48,9 +48,10 @@ public class RedisShardedPool {
         /**连接耗尽时是否阻塞，false抛出异常，true阻塞直到超时*/
         config.setBlockWhenExhausted(true);
         JedisShardInfo info1 = new JedisShardInfo(redisIp1,redisPort1);
+        info1.setPassword("cwssz");
         /*info1.setPassword();设置密码*/
         JedisShardInfo info2 = new JedisShardInfo(redisIp2,redisPort2);
-
+        info2.setPassword("cwssz");
         List<JedisShardInfo> jedisShardInfoList = new ArrayList<JedisShardInfo>(2);
         jedisShardInfoList.add(info1);
         jedisShardInfoList.add(info2);

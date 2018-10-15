@@ -41,60 +41,38 @@ public class ProductManageController {
     public ServiceResponse<PageInfo> getProductList(HttpServletRequest request,
                                                     @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                                     @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
             return iProductManageService.selectAllProduct(pageNum,pageSize);
-        }
-        return response;
     }
 
     @RequestMapping(value = "/search.do",method = RequestMethod.GET)
     public ServiceResponse<PageInfo> searchProductByIdandName(HttpServletRequest request,String productName, Integer productId,
                                                     @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                                     @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
             return iProductManageService.searchProductByIdAndName(productName,productId,pageNum,pageSize);
-        }
-        return response;
     }
     @RequestMapping(value = "/save.do",method = RequestMethod.GET)
     public ServiceResponse<Product> saveProduct(HttpServletRequest request, Product product){
         if (product==null){
             return ServiceResponse.createByErrorMessage("参数错误");
         }
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if(response.isSuccess()){
             return iProductManageService.saveOrUpdateProduct(product);
-        }
-        return response;
     }
 
 
     @RequestMapping("/set_sale_status.do")
     public ServiceResponse setSaleStatus(HttpServletRequest request, Integer productId,Integer status){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
-            iProductManageService.setSaleStatus(productId,status);
-        }
-        return response;
+            return iProductManageService.setSaleStatus(productId,status);
     }
 
     @RequestMapping("/detail.do")
     public ServiceResponse<ProductDetailVo> getDetail(HttpServletRequest request, Integer productId){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if(response.isSuccess()){
             return iProductManageService.geDetail(productId);
-        }
-        return response;
 
     }
 
 
     @RequestMapping(value = "/upload.do",method = RequestMethod.POST)
     public ServiceResponse upload(@RequestParam(value = "upload_file",required = false) MultipartFile file, HttpServletRequest request){
-        ServiceResponse response = iUserService.checkAdminRole(request);
-        if (response.isSuccess()){
             //获取应用的绝对路径
             String path = request.getSession().getServletContext().getRealPath("upload");
             String targetFileName = iFileService.upload(file,path);
@@ -104,8 +82,6 @@ public class ProductManageController {
             filemap.put("uri",targetFileName);
             filemap.put("url",url);
             return ServiceResponse.createBySucces(filemap);
-        }
-       return response;
     }
 
     @RequestMapping("/richtext_img_upload.do")

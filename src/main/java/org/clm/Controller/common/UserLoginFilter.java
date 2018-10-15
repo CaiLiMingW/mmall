@@ -1,3 +1,4 @@
+/*
 package org.clm.Controller.common;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,10 +13,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+*/
 /** 登录认证自定义F
  * @author Ccc
  * @date 2018/10/13 0013 下午 10:39
- */
+ *//*
+
 @WebFilter(filterName = "userLoginFilter",urlPatterns = "*.do")
 public class UserLoginFilter implements Filter {
     @Override
@@ -28,10 +31,9 @@ public class UserLoginFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
         String requestURI = request.getRequestURI();
         User user = null;
-        if(!("/clm/user/login.do".equals(requestURI)||"/clm/product/list.do".equals(requestURI))){
+        if(!("/user/login.do".equals(requestURI)||"/product/list.do".equals(requestURI)||"/manage/user/login.do".equals(requestURI))){
             String sessionId = CookieUtil.readLoginToken(request);
             if(StringUtils.isBlank(sessionId)){
                 this.refresh(servletRequest,servletResponse);
@@ -60,7 +62,7 @@ public class UserLoginFilter implements Filter {
 
         //判断请求的页面是否属于需要强制登录
         //注意:线上服务器路径需加上项目名前缀/clm
-        if ("/clm/user/get_user_info.do".equals(requestURI)|| "/clm/cart/get_cart_product_count.do".equals(requestURI)){
+        if ("/user/get_user_info.do".equals(requestURI)|| "/cart/get_cart_product_count.do".equals(requestURI)){
             servletRequest.getRequestDispatcher("/unNeedLogin").forward(servletRequest,servletResponse);
             return;
         }
@@ -69,3 +71,4 @@ public class UserLoginFilter implements Filter {
         return;
     }
 }
+*/
