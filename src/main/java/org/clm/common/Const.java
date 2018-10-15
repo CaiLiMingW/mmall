@@ -1,6 +1,8 @@
 package org.clm.common;
 
 
+import org.apache.commons.lang3.StringUtils;
+
 /** 常态常量
  * @author Ccc
  * @date 2018/9/27 0027 上午 10:34
@@ -17,7 +19,7 @@ public class Const {
     public interface OrderBy{
         String PRICE_DESC = "price DESC";
         String PRICE_ASC  = "price ASC";
-        String NULL  = "";
+        String NULL  = StringUtils.EMPTY;
     }
 
     public interface Cart{

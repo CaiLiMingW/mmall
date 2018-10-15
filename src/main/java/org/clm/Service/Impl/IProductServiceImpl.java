@@ -2,6 +2,7 @@ package org.clm.Service.Impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.clm.Dao.ProductMapper;
 import org.clm.Pojo.Product;
 import org.clm.VO.ProductListVo;
@@ -39,9 +40,12 @@ public class IProductServiceImpl implements IProductService{
        /* if (categoryId==null){
             return ServiceResponse.createByErrorMessage("categoryId错误");
         }*/
+       if (StringUtils.isNotBlank(orderBy)){
+           orderBy = StringUtils.equals("price_desc",orderBy)?Const.OrderBy.PRICE_DESC:Const.OrderBy.PRICE_ASC;
+       }
         PageHelper.startPage(pageNum,pageSize);
         List<ProductListVo> productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword,
-                orderBy.equals("") ? Const.OrderBy.NULL : orderBy.equals("price_desc") ? Const.OrderBy.PRICE_DESC : Const.OrderBy.PRICE_ASC);
+                orderBy);
         if (productListVos==null){
             return ServiceResponse.createByErrorMessage("参数错误");
         }

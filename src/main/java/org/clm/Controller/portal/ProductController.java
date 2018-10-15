@@ -6,6 +6,7 @@ import org.clm.Service.IUserService;
 import org.clm.Service.Impl.IProductService;
 import org.clm.common.ServiceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,7 @@ public class ProductController {
     private IProductService iProductService;
 
     @RequestMapping("/detail.do")
-    public ServiceResponse getProductDetail(HttpServletRequest request,Integer productId){
+    public ServiceResponse getProductDetail(HttpServletRequest request,@PathVariable("productId") Integer productId){
             return iProductService.getProductDetail(productId);
     }
 

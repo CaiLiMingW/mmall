@@ -28,4 +28,6 @@ public interface OrderMapper {
     List<Order> selectByOrderNoKey(Long orderNo);
 
     List<OrderVo> selectOrderVoByKey(@Param("orderNo") Long orderNo);
+
+    int closeOrderByOrderNo(Long orderNo);
 }

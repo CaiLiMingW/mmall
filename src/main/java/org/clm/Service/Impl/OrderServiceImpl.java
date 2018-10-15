@@ -22,6 +22,7 @@ import com.google.common.collect.Maps;
 import com.mchange.v1.db.sql.ConnectionUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.clm.Dao.*;
@@ -485,6 +486,33 @@ public class OrderServiceImpl implements IOrderService {
             return ServiceResponse.createByErrorMessage("该商品已发货");
         }
         return ServiceResponse.createByErrorMessage("该商品未付款");
+    }
+
+    @Override
+    public void closeOrderTask(int hour) {
+        //当前时间的hour前
+        Date closeTime = DateUtils.addHours(new Date(),-hour);
+        String s = DateTimeUtil.dateToStr(closeTime);
+        //查出hour小时前的订单
+        List<OrderItem> orderItemList = orderItemMapper.selectOrderByStatusCreatetime(Const.OrderStatusEnum.NO_PAY.getCode(), DateTimeUtil.dateToStr(closeTime));
+        for (OrderItem orderItem : orderItemList) {
+            Product updateProduct = new Product();
+           //查看该订单的商品
+            Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+
+            //如果商品已被删除
+            if(product == null){
+                continue;
+            }
+
+            updateProduct.setId(orderItem.getProductId());
+            //取消订单没有被购买,返还库存
+            updateProduct.setStock(orderItem.getQuantity() + product.getStock());
+            productMapper.updateByPrimaryKeySelective(updateProduct);
+
+            int i = orderMapper.closeOrderByOrderNo(orderItem.getOrderNo());
+            log.info("\n=========关闭订单============\n");
+        }
     }
 
     private OrderVo createOrderVo(Order order, List<OrderItem> orderItemList) {

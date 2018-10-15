@@ -57,7 +57,17 @@
     where order_no like '%${orderNo}%'
     ORDER BY create_time desc
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    <select id="selectOrderByStatusCreatetime" resultType="org.clm.Pojo.OrderItem" parameterType="map">
+      select i.id,i.order_no,i.product_id,i.quantity
+      from mmall_order_item i
+      left join mmall_order o
+      on i.order_no = o.order_no
+      where o.status = #{status}
+       <![CDATA[
+      and i.create_time <= #{date}
+      ]]>
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from mmall_order_item
     where id = #{id,jdbcType=INTEGER}
   </delete>

@@ -8,6 +8,10 @@ import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
 import org.clm.util.JsonUtil;
 import org.clm.util.ShardedPoolUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,25 +32,35 @@ import java.util.Queue;
  * @date 2018/10/14 0014 下午 4:58
  */
 public class AuthorityInterceptor implements HandlerInterceptor {
+
+    private static Logger log = LoggerFactory.getLogger(AuthorityInterceptor.class);
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handle) throws Exception {
+
+        HandlerMethod handlerMethod = (HandlerMethod)handle;
+        String methodName = handlerMethod.getMethod().getName();
+        String classname = handlerMethod.getBean().getClass().getSimpleName();
+        log.info("\n=========拦截器拦截到bean===========\n{}\n=========拦截方法===========\n{}\n",classname,methodName);
+        //MethodParameter[] methodParameters = handlerMethod.getMethodParameters();
+        //MethodParameter returnType = handlerMethod.getReturnType();
+
         String sessionId = CookieUtil.readLoginToken(request);
-        String requestURI = request.getRequestURI();
         User user = null;
         if (StringUtils.isBlank(sessionId)){
-            this.forward(request,response);
+            this.forward(request,response,methodName);
             return true;
         }
         String userJsonStr = ShardedPoolUtil.get(sessionId);
         user = JsonUtil.StringToObj(userJsonStr, User.class);
         if (user==null){
-            this.forward(request, response);
+            this.forward(request, response,methodName);
             return true;
         }
-        // / c l m / m a n a g e / 5,11
-        // / m a n a g e / p r o d uct 1-7
-        String manage = requestURI.substring(5, 11);
-        if (("manage").equals(manage)){
+        // manage*
+        //需要管理员权限的业务:方法前缀为manage
+        String manage = methodName.substring(0, 6);
+        if (StringUtils.equals(manage,"manage")){
             if (user.getRole().intValue()== Const.Role.ROLE_ADMIN){
                 return true;
             }
@@ -83,22 +97,25 @@ public class AuthorityInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
-        System.out.println("post");
+        log.info("拦截器");
     }
 
     @Override
     public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
-        System.out.println("after");
     }
 
-    private void forward(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void forward(HttpServletRequest request, HttpServletResponse response,String methodName) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
 
         //判断请求的页面是否属于需要强制登录
         //注意:线上服务器路径需加上项目名前缀/clm
-        if ("/clm/user/get_user_info.do".equals(requestURI)|| "/clm/cart/get_cart_product_count.do".equals(requestURI)){
+
+        if ( StringUtils.equals(methodName,"getUserInfo")||StringUtils.equals(methodName,"getCartProductcount")){
             request.getRequestDispatcher("/unNeedLogin").forward(request,response);
         }
+        /*if ("/clm/user/get_user_info.do".equals(requestURI)|| "/clm/cart/get_cart_product_count.do".equals(requestURI)){
+            request.getRequestDispatcher("/unNeedLogin").forward(request,response);
+        }*/
 
         request.getRequestDispatcher("/needLogin").forward(request,response);
     }

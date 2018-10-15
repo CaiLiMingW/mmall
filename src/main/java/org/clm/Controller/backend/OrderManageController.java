@@ -26,25 +26,25 @@ public class OrderManageController {
     private IOrderService iOrderService;
 
     @RequestMapping("/list.do")
-    public ServiceResponse getOrderList(HttpServletRequest request,
+    public ServiceResponse managegetOrderList(HttpServletRequest request,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
             return iOrderService.getOrderListByUserId(null,pageNum,pageSize);
     }
 
     @RequestMapping("/detail.do")
-    public ServiceResponse getOrderList(HttpServletRequest request,Long orderNo){
+    public ServiceResponse managegetOrderList(HttpServletRequest request,Long orderNo){
             return iOrderService.getOrderDeatilByOrderNo(null,orderNo);
     }
     @RequestMapping("/search.do")
-    public ServiceResponse getOrderList(HttpServletRequest request, Long orderNo,
+    public ServiceResponse managegetOrderList(HttpServletRequest request, Long orderNo,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
             return iOrderService.searchByOrderNoKey(pageNum,pageSize,orderNo);
     }
 
     @RequestMapping("/send_goods.do")
-    public ServiceResponse sendgoods(HttpServletRequest request,Long orderNo){
+    public ServiceResponse managesendgoods(HttpServletRequest request,Long orderNo){
             return iOrderService.sendgoods(orderNo);
     }
 }

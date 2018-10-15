@@ -52,6 +52,7 @@
       select
       <include refid="View"/>
       from mmall_product
+
       <where>
         <if test="categoryId != null and categoryId != ''">
           and category_id = #{categoryId}
@@ -61,7 +62,7 @@
         </if>
       </where>
       <if test="orderBy != null and orderBy != ''">
-        order by #{orderBy}
+        order by  ${orderBy}
       </if>
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >

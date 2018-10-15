@@ -49,8 +49,9 @@
             <mvc:mapping path="/**/*.do"/>
             <!--<mvc:exclude-mapping path="/manage/**"/>-->
             <mvc:exclude-mapping path="/**/login.do"/>
-            <mvc:exclude-mapping path="/product/list.do"/>
-            <mvc:exclude-mapping path="/product/richtext_img_upload.do"/>
+            <mvc:exclude-mapping path="/product/*.do"/>
+            <mvc:exclude-mapping path="/manage/product/richtext_img_upload.do"/>
+            <mvc:exclude-mapping path="/user/outlogin.do"/>
             <bean class="org.clm.Controller.common.Interceptor.AuthorityInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>

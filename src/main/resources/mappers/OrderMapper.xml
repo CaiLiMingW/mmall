@@ -267,4 +267,9 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+    <update id="closeOrderByOrderNo">
+      update mmall_order
+      set  status = 0
+      where order_no = #{orderNo}
+    </update>
 </mapper>

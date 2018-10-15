@@ -30,4 +30,6 @@ public interface IOrderService {
     ServiceResponse searchByOrderNoKey(Integer pageNum, Integer pageSize, Long orderNo);
 
     ServiceResponse sendgoods(Long orderNo);
+
+    void closeOrderTask(int hour);
 }

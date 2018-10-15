@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Param;
 import org.clm.Pojo.Order;
 import org.clm.Pojo.OrderItem;
 
+import java.util.Date;
 import java.util.List;
 
 public interface OrderItemMapper {
@@ -26,4 +27,6 @@ public interface OrderItemMapper {
     List<OrderItem> selectByUserId(@Param("userId") Integer userId);
 
     List<OrderItem> selectByOrderNoKey(Long orderNo);
+
+    List<OrderItem> selectOrderByStatusCreatetime(@Param("status") int status, @Param("date") String date);
 }

@@ -27,7 +27,7 @@ public class CategoryManagerController {
     private ICategoryManageService iCategoryManageService;
 
     @RequestMapping(value = "/get_category.do",method = RequestMethod.GET)
-    public ServiceResponse<List<Category>> getCategoryById(@RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
+    public ServiceResponse<List<Category>> managegetCategoryById(@RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
         if(categoryId==null){
             return ServiceResponse.createByErrorMessage("参数错误");
         }
@@ -35,18 +35,18 @@ public class CategoryManagerController {
     }
 
     @RequestMapping(value = "/add_category.do",method = RequestMethod.GET)
-    public ServiceResponse addCategory(HttpServletRequest request, String categoryName, @RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
+    public ServiceResponse manageaddCategory(HttpServletRequest request, String categoryName, @RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
             return iCategoryManageService.addCategory(categoryName,parentId);
     }
 
     @RequestMapping(value = "/set_category_name.do",method = RequestMethod.GET)
-    public ServiceResponse setCategory(HttpServletRequest request,String categoryName,
+    public ServiceResponse managesetCategory(HttpServletRequest request,String categoryName,
                                        @RequestParam(value = "categoryId",defaultValue = "0")Integer categoryId){
             return iCategoryManageService.setCategoryName(categoryName,categoryId);
     }
 
     @RequestMapping(value = "/get_deep_category.do",method = RequestMethod.GET)
-    public ServiceResponse getChilerCategoryId(HttpServletRequest request,
+    public ServiceResponse managegetChilerCategoryId(HttpServletRequest request,
                                                @RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
             return iCategoryManageService.getAllChildCategoryById(categoryId);
     }
