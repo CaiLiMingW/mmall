@@ -10,6 +10,7 @@ import org.clm.VO.ProductDetailVo;
 import org.clm.common.ServiceResponse;
 import org.clm.util.FTPUtil;
 import org.clm.util.PropertiesUtil;
+import org.clm.util.RedisTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -36,6 +37,8 @@ public class ProductManageController {
     private IProductManageService iProductManageService;
     @Autowired
     private IUserService iUserService;
+
+
 
     @RequestMapping(value = "/list.do",method = RequestMethod.GET)
     public ServiceResponse<PageInfo> manageGetProductList(HttpServletRequest request,

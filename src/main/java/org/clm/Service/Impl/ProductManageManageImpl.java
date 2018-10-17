@@ -11,9 +11,12 @@ import org.clm.Service.IFileService;
 import org.clm.Service.IProductManageService;
 import org.clm.VO.ProductDetailVo;
 import org.clm.VO.ProductListVo;
+import org.clm.common.Const;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
 import org.clm.util.PropertiesUtil;
+import org.clm.util.RedisTemplateUtil;
+import org.clm.util.bak.RedisUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,8 @@ public class ProductManageManageImpl implements IProductManageService {
     private ProductMapper productMapper;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
 
     @Override
     public ServiceResponse saveOrUpdateProduct(Product product) {
@@ -45,6 +50,7 @@ public class ProductManageManageImpl implements IProductManageService {
             }
             int i = productMapper.updateByPrimaryKeySelective(product);
             if(i>0){
+                boolean del = redisTemplateUtil.del(Const.objType.PRODUCT, "" + product.getId());
                 return ServiceResponse.createBySucces("更新产品成功");
             }
             return ServiceResponse.createByError("更新产品失败");

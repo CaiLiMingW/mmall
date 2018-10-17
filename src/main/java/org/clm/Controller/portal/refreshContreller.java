@@ -3,6 +3,8 @@ package org.clm.Controller.portal;
 import org.clm.common.Const;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class refreshContreller {
 
+    @Autowired
+    private RedisTemplate redisTemplate;
     @RequestMapping("/needLogin")
     public ServiceResponse refreshNeedLogin(){
         return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,需强制登录");
@@ -25,6 +29,13 @@ public class refreshContreller {
 
     @RequestMapping("/noAdminRole")
     public ServiceResponse noAdminRole(){
+
         return ServiceResponse.createByErrorMessage("无权限");
     }
+
+    @RequestMapping("del")
+    public void de(){
+        redisTemplate.delete("6379");
+    }
+
 }

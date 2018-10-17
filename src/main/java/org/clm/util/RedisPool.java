@@ -1,20 +1,21 @@
 package org.clm.util;
 
-import org.apache.commons.collections.PredicateUtils;
 import org.clm.Pojo.User;
+import org.springframework.data.redis.core.RedisTemplate;
 import redis.clients.jedis.*;
 import redis.clients.util.Hashing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ccc
  * @date 2018/10/12 0012 下午 9:28
  */
-public class RedisShardedPool {
+public class RedisPool {
     /**Sharded连接池*/
-    private static ShardedJedisPool pool;
+    private static JedisPool pool;
     /**最大连接数*/
     private static Integer maxTotal = Integer.parseInt(PropertiesUtil.getProperty("redis.max.total","20"));
     /**最大空闲状态的jedis实例个数*/
@@ -28,8 +29,7 @@ public class RedisShardedPool {
 
     private static String redisIp1 = PropertiesUtil.getProperty("redis1.ip");
     private static Integer redisPort1 = Integer.parseInt(PropertiesUtil.getProperty("redis1.port"));
-    private static String redisIp2 = PropertiesUtil.getProperty("redis2.ip");
-    private static Integer redisPort2 = Integer.parseInt(PropertiesUtil.getProperty("redis2.port"));
+
 
     static {
         initPool();
@@ -47,23 +47,18 @@ public class RedisShardedPool {
 
         /**连接耗尽时是否阻塞，false抛出异常，true阻塞直到超时*/
         config.setBlockWhenExhausted(true);
-        JedisShardInfo info1 = new JedisShardInfo(redisIp1,redisPort1);
         /*info1.setPassword("cwssz");*/
         /*info1.setPassword();设置密码*/
-        JedisShardInfo info2 = new JedisShardInfo(redisIp2,redisPort2);
         /*info2.setPassword("cwssz");*/
-        List<JedisShardInfo> jedisShardInfoList = new ArrayList<JedisShardInfo>(2);
-        jedisShardInfoList.add(info1);
-        jedisShardInfoList.add(info2);
 
-        pool= new ShardedJedisPool(config,jedisShardInfoList, Hashing.MURMUR_HASH, ShardedJedis.DEFAULT_KEY_TAG_PATTERN);
+        pool= new JedisPool(config,redisIp1,redisPort1);
     }
 
     /**
      * 连连接池获取jedis
      * @return
      */
-    public static ShardedJedis getJedis(){
+    public static Jedis getJedis(){
         return pool.getResource();
     }
 
@@ -71,7 +66,7 @@ public class RedisShardedPool {
      * 回收jedis
      * @param jedis
      */
-    public static void returnBrokenResources(ShardedJedis jedis){
+    public static void returnBrokenResources(Jedis jedis){
         pool.returnBrokenResource(jedis);
     }
 
@@ -79,13 +74,8 @@ public class RedisShardedPool {
      * 回收损坏的jedis
      * @param jedis
      */
-    public static void returnResource(ShardedJedis jedis){
+    public static void returnResource(Jedis jedis){
         pool.returnResource(jedis);
     }
 
-    public static void main(String[] args) {
-        User u = new User();
-        u.setId(1);
-        u.setUsername("1111");
-    }
 }

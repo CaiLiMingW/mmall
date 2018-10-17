@@ -12,6 +12,20 @@ public class Const {
 
     public static final String EMAIL = "email";
     public static final String USERNAME = "username";
+
+    public class objType{
+        public static final String CART = "Cart";
+        public static final String CATRGORY = "Category";
+        public static final String ORDER = "Order";
+        public static final String PAYINFO = "Payinfo";
+        public static final String PRODUCT = "Product";
+        public static final String SHIPPING = "Shipping";
+        public static final String USER = "User";
+        public static final String SESSION = StringUtils.EMPTY;
+        public static final String PRODOCTLISTVO = "productListVos";
+
+
+    }
     public interface RedisCacheExtime{
         int REDIS_SESSION_EXTIME = 60*30;
     }

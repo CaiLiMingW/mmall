@@ -21,11 +21,11 @@ public interface IUserService {
 
     ServiceResponse<String> checkAnswer(String username,String question,String answer);
 
-    ServiceResponse<String> forgetrestPassword(String username,String password,String fotgetToken);
+    ServiceResponse<String> forgetrestPassword(String username,String password,String fotgetToken,String sessionID);
 
-    ServiceResponse<String> restPassword(String passwordOld, String passwordNew, User user);
+    ServiceResponse<String> restPassword(String passwordOld, String passwordNew, User user,String sessionID);
 
-    ServiceResponse<User> updateInfomation(User user);
+    ServiceResponse<User> updateInfomation(User user,String sessionID);
 
     ServiceResponse<User> getInfomation(Integer id);
 

@@ -5,8 +5,7 @@ import org.clm.Service.IUserService;
 import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
-import org.clm.util.JsonUtil;
-import org.clm.util.ShardedPoolUtil;
+import org.clm.util.RedisTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +27,9 @@ public class UserMangerController {
     @Autowired
     private IUserService iUserService;
 
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
+
     @RequestMapping(value = "/login.do",method = RequestMethod.POST)
     @ResponseBody
     public ServiceResponse<User> login(String username, String password, HttpServletResponse responseCookie, HttpSession session){
@@ -37,7 +39,7 @@ public class UserMangerController {
                 //把seesionId存入cookie中
                 CookieUtil.writeLoginToken(responseCookie,session.getId());
                 //将sessionId存入redis中，key:sessionId,value:登录用户信息:时间:30分钟
-                ShardedPoolUtil.setEx(session.getId(), JsonUtil.objToString(response.getData()),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+                redisTemplateUtil.setEx(Const.objType.SESSION,session.getId(), response.getData(),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
                 return response;
             }
             return ServiceResponse.createByErrorMessage("不是管理员,登录失败");

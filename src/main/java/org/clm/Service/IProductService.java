@@ -1,4 +1,4 @@
-package org.clm.Service.Impl;
+package org.clm.Service;
 
 import org.clm.common.ServiceResponse;
 

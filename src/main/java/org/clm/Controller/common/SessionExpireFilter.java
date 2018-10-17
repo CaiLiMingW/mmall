@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.clm.Pojo.User;
 import org.clm.common.Const;
 import org.clm.util.CookieUtil;
-import org.clm.util.JsonUtil;
-import org.clm.util.ShardedPoolUtil;
+import org.clm.util.RedisTemplateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -17,8 +17,11 @@ import java.io.IOException;
  * @date 2018/10/12 0012 下午 5:36
  */
 
-@WebFilter(filterName = "sessionExpireFilter",urlPatterns = "*.do")
+/*@WebFilter(filterName = "sessionExpireFilter",urlPatterns = "*.do")*/
 public class SessionExpireFilter implements Filter {
+
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
@@ -31,10 +34,9 @@ public class SessionExpireFilter implements Filter {
             HttpServletRequest request = (HttpServletRequest) servletRequest;
             String sessionId = CookieUtil.readLoginToken(request);
             if (StringUtils.isNotBlank(sessionId)){
-                String userJsonStr = ShardedPoolUtil.get(sessionId);
-                User user = JsonUtil.StringToObj(userJsonStr, User.class);
+                User user = redisTemplateUtil.get(Const.objType.SESSION,sessionId);
                 if (user!=null){
-                    ShardedPoolUtil.expire(sessionId, Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+                    redisTemplateUtil.expire(Const.objType.SESSION,sessionId, Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
                 }
             }
         } catch (Exception e) {

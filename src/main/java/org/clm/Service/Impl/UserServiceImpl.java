@@ -8,8 +8,8 @@ import org.clm.common.Const;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
-import org.clm.util.JsonUtil;
-import org.clm.util.ShardedPoolUtil;
+import org.clm.util.RedisTemplateUtil;
+import org.clm.util.bak.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +26,8 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
     /**
      *用户登录验证功能
      * @param username
@@ -138,18 +140,18 @@ public class UserServiceImpl implements IUserService {
         if(resultCount > 0){
             /**问题答案正确*/
             String forgetToken = UUID.randomUUID().toString();
-            ShardedPoolUtil.setEx("token_"+username,forgetToken,Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+            redisTemplateUtil.setEx("","token_"+username,forgetToken,Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
             return ServiceResponse.createBySucces(forgetToken);
         }
         return ServiceResponse.createByErrorMessage("答案错误");
     }
 
     @Override
-    public ServiceResponse<String> forgetrestPassword(String username,String passwordNew,String fotgetToken){
+    public ServiceResponse<String> forgetrestPassword(String username,String passwordNew,String fotgetToken,String sessionID){
         if(StringUtils.isBlank(fotgetToken)){
             return ServiceResponse.createByErrorMessage("参数错误，token为空");
         }
-        String token = ShardedPoolUtil.get("token_"+username);
+        String token = redisTemplateUtil.get("","token_"+username);
         if(StringUtils.isBlank(token)){
             return ServiceResponse.createByErrorMessage("Token无效或已过期");
         }
@@ -157,12 +159,14 @@ public class UserServiceImpl implements IUserService {
 
             return ServiceResponse.createByErrorMessage("token错误,请重新进行修改");
         }
-        userMapper.updatePasswordByusername(username, passwordNew);
+        int i = userMapper.updatePasswordByusername(username, passwordNew);
+
+        redisTemplateUtil.del(Const.objType.SESSION,""+sessionID);
         return ServiceResponse.createBySuccessMessage("修改密码成功");
     }
 
     @Override
-    public ServiceResponse<String> restPassword(String passwordOld, String passwordNew, User user){
+    public ServiceResponse<String> restPassword(String passwordOld, String passwordNew, User user,String sessionID){
         /**防止横向越权,校验旧密码是否正常*/
         int resultCount = userMapper.checkPassword(passwordOld, user.getId());
         if (resultCount == 0){
@@ -170,6 +174,7 @@ public class UserServiceImpl implements IUserService {
         }
         int i = userMapper.updatePasswordByusername(user.getUsername(), passwordNew);
         if(i>0){
+            redisTemplateUtil.del(Const.objType.SESSION,""+sessionID);
             user.setPassword(passwordNew);
             return ServiceResponse.createBySuccessMessage("修改成功");
         }
@@ -177,7 +182,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public ServiceResponse<User> updateInfomation(User user) {
+    public ServiceResponse<User> updateInfomation(User user,String sessionID) {
         //检查邮箱是否被使用
         int resultCount = userMapper.checkEmailByUserId(user.getEmail(), user.getId());
         if(resultCount>0){
@@ -186,6 +191,7 @@ public class UserServiceImpl implements IUserService {
         /**只修改以下内容,防止越权修改*/
         User updateuser = new User();
         updateuser.setId(user.getId());
+        updateuser.setUsername(user.getUsername());
         updateuser.setEmail(user.getEmail());
         updateuser.setQuestion(user.getQuestion());
         updateuser.setAnswer(user.getAnswer());
@@ -193,7 +199,12 @@ public class UserServiceImpl implements IUserService {
 
         resultCount = userMapper.updateByPrimaryKeySelective(updateuser);
         if (resultCount>0){
-            return ServiceResponse.createBySuccessMessage("修改成功");
+            redisTemplateUtil.del(Const.objType.SESSION,""+sessionID);
+
+            User newUser = userMapper.selectByPrimaryKey(user.getId());
+            redisTemplateUtil.setEx(Const.objType.SESSION,""+sessionID,newUser,Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+
+            return ServiceResponse.createBySuccess("修改成功",updateuser);
         }
        return ServiceResponse.createByErrorMessage("修改失败");
     }
@@ -215,12 +226,9 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByErrorMessage("用户登录时间已过期,无法获取用户信息");
         }
         /**根据sessionId从Redis获取当前登录用户信息的json字符串*/
-        String str = ShardedPoolUtil.get(sessionId);
-        if (str==null){
-            return ServiceResponse.createByErrorMessage("用户未登录");
-        }
         /**将jsonStr转换为pojo对象*/
-        User user = JsonUtil.StringToObj(str, User.class);
+        User user = RedisUtil.get(Const.objType.SESSION,sessionId,User.class);
+
         if (user==null){
             return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
         }
@@ -243,8 +251,7 @@ public class UserServiceImpl implements IUserService {
         if (StringUtils.isBlank(sessionId)){
             return ServiceResponse.createByErrorMessage("未登录status=1");
         }
-        String userJsonStr = ShardedPoolUtil.get(sessionId);
-        User user = JsonUtil.StringToObj(userJsonStr, User.class);
+        User user = RedisUtil.get(Const.objType.SESSION,sessionId,User.class);
         if (user==null){
             return ServiceResponse.createByErrorMessage("用户信息出错，请重新登录status=1");
         }
@@ -258,10 +265,8 @@ public class UserServiceImpl implements IUserService {
         if (StringUtils.isEmpty(sessionId)){
             return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"未登录,无法获取用户信息");
         }
-
         //从redis获取登录用户信息
-        String userJsonStr = ShardedPoolUtil.get(sessionId);
-        User user = JsonUtil.StringToObj(userJsonStr, User.class);
+        User user = RedisUtil.get(Const.objType.SESSION,sessionId,User.class);
         if (user==null){
             return ServiceResponse.createByCodeError(ResponseCode.NEED_LOGIN.getCode(),"登录已超时，请重新登录");
         }

@@ -1,25 +1,18 @@
 package org.clm.Controller.portal;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.clm.Dao.UserMapper;
 import org.clm.Pojo.User;
 import org.clm.Service.IUserService;
 import org.clm.common.Const;
-import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
-import org.clm.util.JsonUtil;
-import org.clm.util.ShardedPoolUtil;
+import org.clm.util.RedisTemplateUtil;
 import org.joda.time.YearMonth;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -35,6 +28,8 @@ public class UserController {
     @Autowired
     private IUserService iUserService;
 
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
     /**
      * 登录
      * @param username
@@ -50,11 +45,13 @@ public class UserController {
              * 把sessionId写入cookie
              * 存入redis中 key= sessionId,Value = UserJsonString
              */
+            User user = response.getData();
             CookieUtil.writeLoginToken(responseCookie,session.getId());
-            ShardedPoolUtil.setEx(session.getId(), JsonUtil.objToString(response.getData()),
-                                Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+            redisTemplateUtil.setEx(Const.objType.SESSION,session.getId(),user,Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
             //密码清空
-            response.getData().setPassword(StringUtils.EMPTY);
+            user.setPassword(StringUtils.EMPTY);
+            user.setQuestion(StringUtils.EMPTY);
+            user.setAnswer(StringUtils.EMPTY);
         }
         return response;
     }
@@ -66,7 +63,7 @@ public class UserController {
      */
     @RequestMapping(value = "/logout.do",method = RequestMethod.POST)
     public ServiceResponse<User> outlogin(HttpServletResponse responseCookie,HttpServletRequest request){
-            ShardedPoolUtil.del(request.getSession().getId());
+            redisTemplateUtil.del(Const.objType.SESSION,request.getSession().getId());
             CookieUtil.delLoginToken(request,responseCookie);
             return ServiceResponse.createBySuccess();
     }
@@ -101,6 +98,9 @@ public class UserController {
     @RequestMapping(value ="/get_user_info.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> getUserInfo(HttpServletRequest request){
         User user = (User) request.getAttribute("user");
+        user.setPassword(StringUtils.EMPTY);
+        user.setQuestion(StringUtils.EMPTY);
+        user.setAnswer(StringUtils.EMPTY);
         return ServiceResponse.createBySucces(user);
     }
 
@@ -127,28 +127,36 @@ public class UserController {
     }
 
     @RequestMapping(value ="/forget_reset_password.do" ,method =RequestMethod.POST )
-    public ServiceResponse<String> forgetRestPassword(String username,String passwordNew,String forgetToken){
-        return iUserService.forgetrestPassword(username,passwordNew,forgetToken);
+    public ServiceResponse<String> forgetRestPassword(HttpServletRequest request,String username,String passwordNew,String forgetToken){
+        String seesionId = CookieUtil.readLoginToken(request);
+        return iUserService.forgetrestPassword(username,passwordNew,forgetToken,seesionId);
     }
 
     //todo
     @RequestMapping(value ="/reset_password.do" ,method =RequestMethod.POST )
     public ServiceResponse resetPassword(String passwordOld,String passwordNew,HttpServletRequest request){
+        String seesionId = CookieUtil.readLoginToken(request);
         User user = (User)request.getAttribute("user");
-        return iUserService.restPassword(passwordOld,passwordNew,user);
+        return iUserService.restPassword(passwordOld,passwordNew,user,seesionId);
     }
 
     @RequestMapping(value ="/update_information.do" ,method =RequestMethod.POST )
     public ServiceResponse updateInfomation(HttpServletRequest request,User updateuser){
         User user = (User)request.getAttribute("user");
         updateuser.setId(user.getId());
-        return iUserService.updateInfomation(updateuser);
+        updateuser.setUsername(user.getUsername());
+        String sessionId = CookieUtil.readLoginToken(request);
+        ServiceResponse<User> response = iUserService.updateInfomation(updateuser,sessionId);
+        if (response.isSuccess()){
+            request.setAttribute("newUser",response.getData());
+        }
+        return response;
     }
 
     @RequestMapping(value ="/get_information.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> getInfomation(HttpServletRequest request){
         User user = (User)request.getAttribute("user");
-        return iUserService.getInfomation(user.getId());
+        return ServiceResponse.createBySucces(user);
     }
 
 }

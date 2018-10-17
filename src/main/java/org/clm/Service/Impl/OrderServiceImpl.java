@@ -81,7 +81,8 @@ public class OrderServiceImpl implements IOrderService {
     private ProductMapper productMapper;
     @Autowired
     private ShippingMapper shippingMapper;
-
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
 
     private static Log log = LogFactory.getLog(OrderServiceImpl.class);
 
@@ -639,6 +640,8 @@ public class OrderServiceImpl implements IOrderService {
         for (OrderItem orderItem : orderItemList) {
             Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
             product.setStock(product.getStock()-orderItem.getQuantity());
+
+            redisTemplateUtil.del(Const.objType.PRODUCT,""+product.getId());
             int update = productMapper.updateByPrimaryKeySelective(product);
         }
     }

@@ -7,9 +7,10 @@ import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
 import org.clm.util.JsonUtil;
-import org.clm.util.ShardedPoolUtil;
+import org.clm.util.RedisTemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
@@ -34,6 +35,8 @@ import java.util.Queue;
 public class AuthorityInterceptor implements HandlerInterceptor {
 
     private static Logger log = LoggerFactory.getLogger(AuthorityInterceptor.class);
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handle) throws Exception {
@@ -49,13 +52,12 @@ public class AuthorityInterceptor implements HandlerInterceptor {
         User user = null;
         if (StringUtils.isBlank(sessionId)){
             this.forward(request,response,methodName);
-            return true;
+            return false;
         }
-        String userJsonStr = ShardedPoolUtil.get(sessionId);
-        user = JsonUtil.StringToObj(userJsonStr, User.class);
+        user = redisTemplateUtil.get(Const.objType.SESSION, sessionId);
         if (user==null){
             this.forward(request, response,methodName);
-            return true;
+            return false;
         }
         // manage*
         //需要管理员权限的业务:方法前缀为manage
@@ -73,31 +75,44 @@ public class AuthorityInterceptor implements HandlerInterceptor {
         return true;
 
 
-       /* //请求controller中的方法名
-        HandlerMethod handlerMethod = (HandlerMethod)handle;
-        //解析handlerMethod
-        String name = handlerMethod.getMethod().getName();
-        handlerMethod.getBean().getClass().getSimpleName();
-
-        StringBuffer stringBuffer = new StringBuffer();
-        Map<String,String[]> paramMap = httpServletRequest.getParameterMap();
-        Map reusltMap = new HashMap();
-        for (Map.Entry s : paramMap.entrySet()) {
-            Map.Entry entry = (Map.Entry)s;
-            String mapKey = (String) entry.getKey();
-            String mapValue = StringUtils.EMPTY;
-
-            Object obj = entry.getValue();
-            if (obj instanceof String[]){
-
-            }
-        }*/
-
     }
 
     @Override
-    public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
-        log.info("拦截器");
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handle, ModelAndView modelAndView) throws Exception {
+
+        try {
+            String sessionId = CookieUtil.readLoginToken(request);
+            if (StringUtils.isNotBlank(sessionId)){
+                User user = redisTemplateUtil.get(Const.objType.SESSION,sessionId);
+                if (user!=null){
+                    redisTemplateUtil.expire(Const.objType.SESSION,sessionId, Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+                }
+            }
+        } catch (Exception e) {
+            log.info("\n========重制用户登录异常========\n{}\n",e);
+        }
+
+        /*HandlerMethod handlerMethod = (HandlerMethod) handle;
+        String methoName = handlerMethod.getMethod().getName();
+        if (StringUtils.equals(methoName,"updateInfomation")){
+            log.info("\n=========postHandle拦截{}===========\n{}\n",methoName);
+            User newUser = (User) request.getAttribute("newUser");
+            User oldUser = (User)request.getAttribute("user");
+            if (newUser!=null){
+                if (!(JsonUtil.objToString(oldUser).equals(JsonUtil.objToString(newUser)))){
+                    log.info("\n============用户信息改变==============\n");
+                    String sessionId = CookieUtil.readLoginToken(request);
+                    boolean reult = redisTemplateUtil.setEx(Const.objType.SESSION, sessionId, newUser, Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+
+                    if (reult){
+                        log.info("\n============修改redis用户缓存信息成功==============\n");
+                    }else {
+                        log.info("\n============修改redis用户缓存信息失败==============\n");
+                    }
+
+                }
+            }
+        }*/
     }
 
     @Override
@@ -112,12 +127,14 @@ public class AuthorityInterceptor implements HandlerInterceptor {
 
         if ( StringUtils.equals(methodName,"getUserInfo")||StringUtils.equals(methodName,"getCartProductcount")){
             request.getRequestDispatcher("/unNeedLogin").forward(request,response);
+        }else {
+            request.getRequestDispatcher("/needLogin").forward(request,response);
         }
         /*if ("/clm/user/get_user_info.do".equals(requestURI)|| "/clm/cart/get_cart_product_count.do".equals(requestURI)){
             request.getRequestDispatcher("/unNeedLogin").forward(request,response);
         }*/
 
-        request.getRequestDispatcher("/needLogin").forward(request,response);
+
     }
 
 
