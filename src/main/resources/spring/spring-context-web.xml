@@ -53,6 +53,7 @@
             <mvc:exclude-mapping path="/manage/product/richtext_img_upload.do"/>
             <mvc:exclude-mapping path="/user/logout.do"/>
             <mvc:exclude-mapping path="/user/forget*"/>
+            <mvc:exclude-mapping path="/order/alipay_callback.do"/>
             <bean class="org.clm.Controller.common.Interceptor.AuthorityInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>

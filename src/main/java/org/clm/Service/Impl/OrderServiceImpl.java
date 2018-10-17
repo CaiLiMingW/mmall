@@ -261,9 +261,11 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         /**判断订单状态,是否重复回调*/
+
         if(order.getStatus()>= Const.OrderStatusEnum.PAID.getCode()){
             ServiceResponse.createBySuccessMessage("支付回调重复调用,过滤");
         }
+        log.info("\n=========判断订单状态==========\n");
 
         /**校验订单状态，是否已成功*/
        if(Const.AlipayCallback.TRADE_STATUS_TRADE_SUCCESS.equals(tradeStatus)){
