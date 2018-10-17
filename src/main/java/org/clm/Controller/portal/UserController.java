@@ -99,8 +99,6 @@ public class UserController {
     public ServiceResponse<User> getUserInfo(HttpServletRequest request){
         User user = (User) request.getAttribute("user");
         user.setPassword(StringUtils.EMPTY);
-        user.setQuestion(StringUtils.EMPTY);
-        user.setAnswer(StringUtils.EMPTY);
         return ServiceResponse.createBySucces(user);
     }
 

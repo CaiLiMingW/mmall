@@ -13,6 +13,7 @@ import org.clm.util.RedisTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,6 +36,10 @@ public class IProductServiceImpl implements IProductService {
 
         Product product = redisTemplateUtil.get(Const.objType.PRODUCT,""+productId);
 
+        List s = new ArrayList();
+        s.add("1");
+        s.add("2");
+        redisTemplateUtil.lsetx("1","2",s);
         //从缓存获取product
 
         //若为Null，从数据库取最新数据,并更新到缓存中
@@ -53,31 +58,31 @@ public class IProductServiceImpl implements IProductService {
 
     @Override
     public ServiceResponse getProductList( Integer categoryId, Integer pageNum, Integer pageSize, String keyword, String orderBy) {
+        PageHelper.startPage(pageNum,pageSize);
+        PageInfo pageInfo = null;
         if (StringUtils.isNotBlank(orderBy)){
             orderBy = StringUtils.equals("price_desc",orderBy)?Const.OrderBy.PRICE_DESC:Const.OrderBy.PRICE_ASC;
         }
-        List<ProductListVo> productListVos = redisTemplateUtil.lget(Const.objType.PRODOCTLISTVO,
-                                                     ""+categoryId+pageNum+pageSize+keyword+orderBy);
+        pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO, "" + categoryId + pageNum + pageSize + keyword+orderBy);
+      /*  List<ProductListVo> productListVos = redisTemplateUtil.lget(Const.objType.PRODOCTLISTVO,
+                                                     ""+categoryId+pageNum+pageSize+keyword+orderBy);*/
         /*productListVos = RedisUtil.getList(Const.objType.PRODOCTLISTVO,
                 "" + categoryId + pageNum + pageSize + keyword+orderBy,
                 new TypeReference<List<ProductListVo>>() {
         });*/
 
-        if(productListVos==null||productListVos.size()==0){
-            PageHelper.startPage(pageNum,pageSize);
+        if(pageInfo==null){
 
-            productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword, orderBy);
-
-            redisTemplateUtil.lset(Const.objType.PRODOCTLISTVO,
-                    ""+categoryId+pageNum+pageSize+keyword+orderBy,productListVos);
+            List<ProductListVo> productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword, orderBy);
+            pageInfo = new PageInfo(productListVos);
+            redisTemplateUtil.set(Const.objType.PRODOCTLISTVO,""+categoryId+pageNum+pageSize+keyword+orderBy,pageInfo);
+            /*redisTemplateUtil.lset(Const.objType.PRODOCTLISTVO,
+                    ""+categoryId+pageNum+pageSize+keyword+orderBy,productListVos);*/
         }
 
-
-        if (productListVos==null){
+        if (pageInfo==null){
             return ServiceResponse.createByErrorMessage("参数错误");
         }
-        PageInfo pageInfo = new PageInfo(productListVos);
-
         return ServiceResponse.createBySucces(pageInfo);
     }
 }

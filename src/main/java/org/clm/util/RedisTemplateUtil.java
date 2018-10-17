@@ -1,8 +1,11 @@
 package org.clm.util;
 
+import com.github.pagehelper.PageInfo;
+import org.clm.VO.ProductListVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -40,18 +43,33 @@ public class RedisTemplateUtil {
             return false;
         }
     }
-
-    public <T> List<T> lget(String objType, String key){
+    public  boolean lsetx(String objType, String key, List objList){
         key = objType+"_"+key;
         try {
             /*value = JsonUtil.objToString(obj);*/
-            List<T> dataList =  redisTemplate.opsForList().range(key, 0, -1);
+            redisTemplate.opsForList().leftPush(key,objList);
+            return true;
+        }catch (Exception e){
+            log.info("\n=========lset:errer{}==========\n",e);
+            return false;
+        }
+    }
+
+
+    public <T> List<T>  lget(String objType, String key ,T obj){
+        key = objType+"_"+key;
+        List<T> dataList = null;
+        try {
+            /*value = JsonUtil.objToString(obj);*/
+            List<Page> range = redisTemplate.opsForList().range(key, 0, -1);
+            dataList = (List<T>)range.get(0);
             return dataList;
         }catch (Exception e){
             log.info("\n=========lget:errer==========\n{}\n",e);
             return null;
         }
     }
+
 
     public <T> boolean set(String objType, String key,T obj){
         key = objType+"_"+key;
