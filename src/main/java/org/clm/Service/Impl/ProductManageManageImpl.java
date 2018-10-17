@@ -50,7 +50,17 @@ public class ProductManageManageImpl implements IProductManageService {
             }
             int i = productMapper.updateByPrimaryKeySelective(product);
             if(i>0){
-                boolean del = redisTemplateUtil.del(Const.objType.PRODUCT, "" + product.getId());
+                //删除产品详情在redis中的缓存
+                redisTemplateUtil.del(Const.objType.PRODUCT, "" + product.getId());
+                Product pd = productMapper.selectByPrimaryKey(product.getId());
+
+                //如果修改了价格
+                if(pd.getPrice().equals(product.getPrice())){
+                    //删除商品列表详情缓存
+                    redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO, "search");
+                    redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO,""+pd.getCategoryId());
+                }
+
                 return ServiceResponse.createBySucces("更新产品成功");
             }
             return ServiceResponse.createByError("更新产品失败");

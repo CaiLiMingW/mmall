@@ -63,7 +63,11 @@ public class IProductServiceImpl implements IProductService {
         if (StringUtils.isNotBlank(orderBy)){
             orderBy = StringUtils.equals("price_desc",orderBy)?Const.OrderBy.PRICE_DESC:Const.OrderBy.PRICE_ASC;
         }
-        pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO, "" + categoryId + pageNum + pageSize + keyword+orderBy);
+        if (categoryId==null){
+
+        }
+        pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,
+                "" + (categoryId==null?"search":categoryId) + pageNum + pageSize + keyword+orderBy);
       /*  List<ProductListVo> productListVos = redisTemplateUtil.lget(Const.objType.PRODOCTLISTVO,
                                                      ""+categoryId+pageNum+pageSize+keyword+orderBy);*/
         /*productListVos = RedisUtil.getList(Const.objType.PRODOCTLISTVO,
@@ -75,7 +79,7 @@ public class IProductServiceImpl implements IProductService {
 
             List<ProductListVo> productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword, orderBy);
             pageInfo = new PageInfo(productListVos);
-            redisTemplateUtil.set(Const.objType.PRODOCTLISTVO,""+categoryId+pageNum+pageSize+keyword+orderBy,pageInfo);
+            redisTemplateUtil.set(Const.objType.PRODOCTLISTVO,""+(categoryId==null?"search":categoryId)+pageNum+pageSize+keyword+orderBy,pageInfo);
             /*redisTemplateUtil.lset(Const.objType.PRODOCTLISTVO,
                     ""+categoryId+pageNum+pageSize+keyword+orderBy,productListVos);*/
         }

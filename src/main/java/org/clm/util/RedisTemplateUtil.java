@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,7 +34,7 @@ public class RedisTemplateUtil {
     }
 
     public  <T> boolean lset(String objType, String key, List<T> objList){
-        key = objType+"_"+key;
+        key = objType+""+key;
         try {
             /*value = JsonUtil.objToString(obj);*/
              redisTemplate.opsForList().leftPush(key,objList);
@@ -44,7 +45,7 @@ public class RedisTemplateUtil {
         }
     }
     public  boolean lsetx(String objType, String key, List objList){
-        key = objType+"_"+key;
+        key = objType+""+key;
         try {
             /*value = JsonUtil.objToString(obj);*/
             redisTemplate.opsForList().leftPush(key,objList);
@@ -57,7 +58,7 @@ public class RedisTemplateUtil {
 
 
     public <T> List<T>  lget(String objType, String key ,T obj){
-        key = objType+"_"+key;
+        key = objType+""+key;
         List<T> dataList = null;
         try {
             /*value = JsonUtil.objToString(obj);*/
@@ -72,7 +73,7 @@ public class RedisTemplateUtil {
 
 
     public <T> boolean set(String objType, String key,T obj){
-        key = objType+"_"+key;
+        key = objType+""+key;
         try {
             /*value = JsonUtil.objToString(obj);*/
             redisTemplate.opsForValue().set(key,obj);
@@ -84,7 +85,7 @@ public class RedisTemplateUtil {
     }
 
     public <T> boolean setEx(String objType, String key,T obj,int timeout){
-        key = objType+"_"+key;
+        key = objType+""+key;
         try {
             /*value = JsonUtil.objToString(obj);*/
             redisTemplate.opsForValue().set(key,obj,timeout,TimeUnit.SECONDS);
@@ -96,7 +97,7 @@ public class RedisTemplateUtil {
     }
 
     public <T> T get(String objType, String key){
-        key = objType+"_"+key;
+        key = objType+""+key;
         try {
             /*value = JsonUtil.objToString(obj);*/
             T data = (T)redisTemplate.opsForValue().get(key);
@@ -108,7 +109,7 @@ public class RedisTemplateUtil {
     }
 
     public <T> boolean del(String objType, String key){
-        key = objType+"_"+key;
+        key = objType+""+key;
         try {
             /*value = JsonUtil.objToString(obj);*/
             redisTemplate.delete(key);
@@ -120,10 +121,11 @@ public class RedisTemplateUtil {
     }
 
     public <T> boolean delByKey(String objType, String key){
-        key = objType+"_"+key;
+        key = objType+""+key;
         try {
+            Set keys = redisTemplate.keys(key + "*");
             /*value = JsonUtil.objToString(obj);*/
-            redisTemplate.delete(redisTemplate.keys(key));
+            redisTemplate.delete(redisTemplate.keys(key+"*"));
             return true;
         }catch (Exception e){
             log.info("\n=========del:errer==========\n{}\n",e);
@@ -132,7 +134,7 @@ public class RedisTemplateUtil {
     }
 
     public boolean expire(String objType, String key, int timeout) {
-        key = objType+"_"+key;
+        key = objType+""+key;
         try {
             redisTemplate.expire(key,timeout, TimeUnit.SECONDS);
             return true;
