@@ -61,7 +61,13 @@ public class AuthorityInterceptor implements HandlerInterceptor {
         }
         // manage*
         //需要管理员权限的业务:方法前缀为manage
-        String manage = methodName.substring(0, 6);
+        String manage;
+        if (methodName.length()>=6){
+            manage = methodName.substring(0, 6);
+        }else {
+            manage = methodName;
+        }
+
         if (StringUtils.equals(manage,"manage")){
             if (user.getRole().intValue()== Const.Role.ROLE_ADMIN){
                 return true;
