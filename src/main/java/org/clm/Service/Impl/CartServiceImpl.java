@@ -5,17 +5,21 @@ import org.apache.commons.collections.CollectionUtils;
 import org.clm.Dao.CartMapper;
 import org.clm.Dao.ProductMapper;
 import org.clm.Pojo.Cart;
+import org.clm.Pojo.Product;
 import org.clm.Pojo.User;
 import org.clm.Service.ICartService;
 import org.clm.VO.CartProductVo;
 import org.clm.VO.CartVo;
+import org.clm.common.Const;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
 import org.clm.util.BigDecimalUtil;
 import org.clm.util.PropertiesUtil;
+import org.clm.util.RedisTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Console;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -29,6 +33,8 @@ public class CartServiceImpl implements ICartService {
     private CartMapper cartMapper;
     @Autowired
     private ProductMapper productMapper;
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
 
     @Override
     public ServiceResponse getCartProductList(User user){
@@ -41,24 +47,36 @@ public class CartServiceImpl implements ICartService {
         if(productId == null || count == null){
             return ServiceResponse.createByCodeError(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
-        /**检查购物车*/
+        //查看该用户购物车是否已有该商品
         Cart cart = cartMapper.checkStockAndCar(user.getId(), productId);
 
-
-        if( productMapper.selectByPrimaryKey(productId)==null){
+        //检查该商品是否存在
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if( product == null){
             return ServiceResponse.createByErrorMessage("该商品不存在");
         }
+
+        int resultInsert = 0;
+        int resultUpdate = 0;
         if(cart==null){
             Cart newcart = new Cart();
             newcart.setUserId(user.getId());
             newcart.setProductId(productId);
             newcart.setQuantity(count);
-            cartMapper.insertSelective(newcart);
+            resultInsert = cartMapper.insertSelective(newcart);
+
         }else{
             count = count + cart.getQuantity();
             cart.setQuantity(count);
-            cartMapper.updateByPrimaryKeySelective(cart);
+            resultUpdate = cartMapper.updateByPrimaryKeySelective(cart);
         }
+
+        //成功加入购物车后:预减缓存中的产品库存
+//        if (resultInsert > 0 || resultUpdate > 0){
+//            product.setStock(product.getStock()-count);
+//            redisTemplateUtil.set(Const.objType.PRODUCT,""+productId,product);
+//        }
+
         return this.getCartProductList(user);
     }
 

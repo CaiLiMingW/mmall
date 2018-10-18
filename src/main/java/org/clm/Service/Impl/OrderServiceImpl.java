@@ -338,7 +338,7 @@ public class OrderServiceImpl implements IOrderService {
         orderItemMapper.batchInsert(orderItemList);
 
         //减少产品库存
-        this.reduceProductStock(orderItemList);
+        this.reduceOrIncreaseProductStock(orderItemList,true);
 
         //清空一下购物车
         this.clearCart(cartList);
@@ -435,7 +435,29 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         int resultCow = orderMapper.deleteByPrimaryKey(order.getId());
+
         if (resultCow>0){
+
+
+            //获取订单详情
+            List<OrderItem> orderItemList = orderItemMapper.selectByUserIdAndOrderNo(useId, orderNo);
+            this.reduceOrIncreaseProductStock(orderItemList,false);
+//            for (OrderItem orderItem : orderItemList) {
+//                //从缓存中获取旧的产品库存
+//                Product product = redisTemplateUtil.get(Const.objType.PRODUCT,""+orderItem.getProductId());
+//                if (product==null){
+//                    product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+//                }
+//                //返回库存
+//                product.setStock(product.getStock()+orderItem.getQuantity());
+//                //持久化到数据库
+//                int update = productMapper.updateByPrimaryKeySelective(product);
+//                if (update > 0){
+//                    //删除缓存
+//                    redisTemplateUtil.del(Const.objType.PRODUCT,""+product.getId());
+//                }
+//            }
+
             return ServiceResponse.createBySuccess();
         }
         return ServiceResponse.createByErrorMessage("订单取消失败");
@@ -498,23 +520,33 @@ public class OrderServiceImpl implements IOrderService {
         String s = DateTimeUtil.dateToStr(closeTime);
         //查出hour小时前的订单
         List<OrderItem> orderItemList = orderItemMapper.selectOrderByStatusCreatetime(Const.OrderStatusEnum.NO_PAY.getCode(), DateTimeUtil.dateToStr(closeTime));
-        for (OrderItem orderItem : orderItemList) {
-            Product updateProduct = new Product();
-           //查看该订单的商品
-            Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
 
+        for (OrderItem orderItem : orderItemList) {
+
+            //查看该订单的商品
+            Product product = redisTemplateUtil.get(Const.objType.PRODUCT,""+orderItem.getProductId());
+            if (product==null){
+                 product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+            }
             //如果商品已被删除
             if(product == null){
                 continue;
             }
+            product.setStock(product.getStock()+orderItem.getQuantity());
 
-            updateProduct.setId(orderItem.getProductId());
             //取消订单没有被购买,返还库存
-            updateProduct.setStock(orderItem.getQuantity() + product.getStock());
-            productMapper.updateByPrimaryKeySelective(updateProduct);
+            int update = productMapper.updateByPrimaryKeySelective(product);
+            if(update>0){
+                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
+            }
 
             int i = orderMapper.closeOrderByOrderNo(orderItem.getOrderNo());
-            log.info("\n=========关闭订单============\n");
+            if (i > 0 ){
+                log.info("\n=========关闭订单成功============\n");
+            }else {
+                log.info("\n=========关闭订单失败============\n");
+            }
+
         }
     }
 
@@ -637,14 +669,31 @@ public class OrderServiceImpl implements IOrderService {
         return null;
     }
 
-    /**减少库存*/
-    private void reduceProductStock(List<OrderItem> orderItemList) {
-        for (OrderItem orderItem : orderItemList) {
-            Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
-            product.setStock(product.getStock()-orderItem.getQuantity());
+    /**减少或增加库存 true减少,fasle返回增加*/
+    private void reduceOrIncreaseProductStock(List<OrderItem> orderItemList,boolean reduceOrIncrease) {
 
-            redisTemplateUtil.del(Const.objType.PRODUCT,""+product.getId());
+        for (OrderItem orderItem : orderItemList) {
+             /*product = productMapper.selectByPrimaryKey(orderItem.getProductId());*/
+            /*product.setStock(product.getStock()-orderItem.getQuantity());*/
+
+            //获取产品库存
+            Product product = redisTemplateUtil.get(Const.objType.PRODUCT, "" + orderItem.getProductId());
+            if (product==null){
+                product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+            }
+
+            if (reduceOrIncrease){
+                product.setStock(product.getStock()-orderItem.getQuantity());
+            }else{
+                product.setStock(product.getStock()+orderItem.getQuantity());
+            }
+
+            //将库存持久化到数据库
             int update = productMapper.updateByPrimaryKeySelective(product);
+            //删除redis商品详情缓存
+            if( update > 0){
+                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
+            }
         }
     }
     /***/
