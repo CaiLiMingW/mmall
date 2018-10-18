@@ -31,15 +31,15 @@ public class OrderVo {
 
     private String statusDesc;
 
-    private Date paymentTime;
+    private String paymentTime;
 
-    private Date sendTime;
+    private String sendTime;
 
-    private Date endTime;
+    private String endTime;
 
-    private Date closeTime;
+    private String closeTime;
 
-    private Date createTime;
+    private String createTime;
 
     private List<OrderItemVo> orderItemVoList;
     private String imageHost;
@@ -136,43 +136,43 @@ public class OrderVo {
         this.status = status;
     }
 
-    public Date getPaymentTime() {
+    public String getPaymentTime() {
         return paymentTime;
     }
 
-    public void setPaymentTime(Date paymentTime) {
+    public void setPaymentTime(String paymentTime) {
         this.paymentTime = paymentTime;
     }
 
-    public Date getSendTime() {
+    public String getSendTime() {
         return sendTime;
     }
 
-    public void setSendTime(Date sendTime) {
+    public void setSendTime(String sendTime) {
         this.sendTime = sendTime;
     }
 
-    public Date getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
 
-    public Date getCloseTime() {
+    public String getCloseTime() {
         return closeTime;
     }
 
-    public void setCloseTime(Date closeTime) {
+    public void setCloseTime(String closeTime) {
         this.closeTime = closeTime;
     }
 
-    public Date getCreateTime() {
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 

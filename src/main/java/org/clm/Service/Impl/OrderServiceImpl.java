@@ -433,8 +433,8 @@ public class OrderServiceImpl implements IOrderService {
         if(order.getStatus()>=Const.OrderStatusEnum.PAID.getCode()){
             return ServiceResponse.createByErrorMessage("此订单已付款，无法被取消");
         }
-
-        int resultCow = orderMapper.deleteByPrimaryKey(order.getId());
+        order.setStatus(0);
+        int resultCow = orderMapper.closeOrderByOrderNo(order.getOrderNo());
 
         if (resultCow>0){
 
@@ -501,6 +501,8 @@ public class OrderServiceImpl implements IOrderService {
         }
         if (order.getStatus().equals(Const.OrderStatusEnum.PAID.getCode())){
             order.setStatus(Const.OrderStatusEnum.SHIPPED.getCode());
+            order.setSendTime(new Date());
+            order.setEndTime(new Date());
             int updateCow = orderMapper.updateByPrimaryKeySelective(order);
             if (updateCow > 0){
                 return ServiceResponse.createBySuccessMessage("发货成功");
@@ -540,6 +542,9 @@ public class OrderServiceImpl implements IOrderService {
                 redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
             }
 
+//            Order order = orderMapper.selectByOrderNo(orderItem.getOrderNo());
+//            order.setCloseTime(new Date());
+//            orderMapper.updateByPrimaryKeySelective(order);
             int i = orderMapper.closeOrderByOrderNo(orderItem.getOrderNo());
             if (i > 0 ){
                 log.info("\n=========关闭订单成功============\n");
@@ -563,11 +568,11 @@ public class OrderServiceImpl implements IOrderService {
             orderItemVoList.add(orderItemVo);
         }
         /**转换时间*/
-        /*orderVo.setPaymentTime(DateTimeUtil.dateToStr(order.getPaymentTime()));
+        orderVo.setPaymentTime(DateTimeUtil.dateToStr(order.getPaymentTime()));
         orderVo.setSendTime(DateTimeUtil.dateToStr(order.getSendTime()));
         orderVo.setEndTime(DateTimeUtil.dateToStr(order.getEndTime()));
         orderVo.setCreateTime(DateTimeUtil.dateToStr(order.getCreateTime()));
-        orderVo.setCloseTime(DateTimeUtil.dateToStr(order.getCloseTime()));*/
+        orderVo.setCloseTime(DateTimeUtil.dateToStr(order.getCloseTime()));
 
         orderVo.setStatusDesc(Const.OrderStatusEnum.codeOf(order.getStatus()).getValue());
         orderVo.setPaymentTypeDesc(Const.PaymentTypeEnum.codeOf(order.getPaymentType()).getValue());

@@ -96,6 +96,7 @@ public class CartServiceImpl implements ICartService {
         if (updateRow==0){
             return ServiceResponse.createByErrorMessage("更新产品数量失败");
         }
+
         return this.getCartProductList(user);
     }
 

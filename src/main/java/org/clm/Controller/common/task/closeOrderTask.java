@@ -20,7 +20,7 @@ public class closeOrderTask {
     private IOrderService iOrderService;
 
     private static final Logger log = LoggerFactory.getLogger(closeOrderTask.class);
-    @Scheduled(cron="*/20 * * * * ?")
+    @Scheduled(cron="* */5 * * * ?")
     public void closeOrderTaskv(){
         //TODO 定时关单
 
