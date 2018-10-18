@@ -32,4 +32,6 @@ public interface IOrderService {
     ServiceResponse sendgoods(Long orderNo);
 
     void closeOrderTask(int hour);
+
+    void dedelCloseOrderTask();
 }

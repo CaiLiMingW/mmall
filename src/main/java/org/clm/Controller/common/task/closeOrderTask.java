@@ -20,7 +20,7 @@ public class closeOrderTask {
     private IOrderService iOrderService;
 
     private static final Logger log = LoggerFactory.getLogger(closeOrderTask.class);
-    @Scheduled(cron="* */5 * * * ?")
+    @Scheduled(cron="0 */5 * * * ? ")
     public void closeOrderTaskv(){
         //TODO 定时关单
 
@@ -28,6 +28,12 @@ public class closeOrderTask {
         iOrderService.closeOrderTask(hour);
         System.out.println(1);
         log.info("定时任务");
+    }
+
+//    @Scheduled(cron="0 0 0 1 * ? ")
+@Scheduled(cron="0 0 1 * * ? ")
+    public void delCloseOrderTask(){
+        iOrderService.dedelCloseOrderTask();
     }
 
     public static void main(String[] args) {

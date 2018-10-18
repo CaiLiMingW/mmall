@@ -1,6 +1,8 @@
 package org.clm.Dao;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.clm.Pojo.Order;
 import org.clm.Pojo.OrderItem;
 
@@ -29,4 +31,10 @@ public interface OrderItemMapper {
     List<OrderItem> selectByOrderNoKey(Long orderNo);
 
     List<OrderItem> selectOrderByStatusCreatetime(@Param("status") int status, @Param("date") String date);
+
+    @Select("select id,order_no from mmall_order_item where ")
+    List<OrderItem> delOrderNoAndCreatetime();
+
+    @Delete("delete from mmall_order_item where order_no = #{orderNo}  ")
+    int deletebyOrderNo(@Param("orderNo") Long orderNo);
 }

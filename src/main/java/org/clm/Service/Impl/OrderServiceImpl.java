@@ -555,6 +555,29 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
+    @Override
+    public void dedelCloseOrderTask() {
+        Date s7DayAgo = DateUtils.addDays(new Date(), -7);
+        //删除七天前，取消状态的订单
+        List<Order> orderList = orderMapper.selectByStatusAndCreatetime(Const.OrderStatusEnum.CANCELED.getCode(), s7DayAgo);
+        for (Order order : orderList) {
+            int i = orderMapper.deletebyOrderNo(order.getOrderNo());
+            if (i >0){
+                orderItemMapper.deletebyOrderNo(order.getOrderNo());
+            }
+        }
+
+        Date twoMonsAgo = DateUtils.addMonths(new Date(), -2);
+        //删除两个月前的已发货所有订单
+        List<Order> orderList2 = orderMapper.selectByStatusAndCreatetime(Const.OrderStatusEnum.SHIPPED.getCode(), twoMonsAgo);
+        for (Order order : orderList2) {
+            int j = orderMapper.deletebyOrderNo(order.getOrderNo());
+            if (j >0){
+                orderItemMapper.deletebyOrderNo(order.getOrderNo());
+            }
+        }
+    }
+
     private OrderVo createOrderVo(Order order, List<OrderItem> orderItemList) {
         List<OrderItemVo> orderItemVoList = new ArrayList<>();
         OrderVo orderVo = new OrderVo();
@@ -700,6 +723,11 @@ public class OrderServiceImpl implements IOrderService {
                 redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
             }
         }
+    }
+
+    public static void main(String[] args) {
+        Date date = DateUtils.addMonths(new Date(), -1);
+        System.out.println(date);
     }
     /***/
 }
