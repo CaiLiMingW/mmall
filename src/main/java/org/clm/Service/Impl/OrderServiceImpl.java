@@ -733,7 +733,7 @@ public class OrderServiceImpl implements IOrderService {
             int update = productMapper.updateByPrimaryKeySelective(product);
             //删除redis商品详情缓存
             if( update > 0){
-                rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));
+//                rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));
 //                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
             }
 
