@@ -10,6 +10,7 @@ import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
 import org.clm.util.RedisTemplateUtil;
 import org.clm.util.bak.RedisUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,9 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private RedisTemplateUtil redisTemplateUtil;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     /**
      *用户登录验证功能
      * @param username
@@ -160,8 +164,10 @@ public class UserServiceImpl implements IUserService {
             return ServiceResponse.createByErrorMessage("token错误,请重新进行修改");
         }
         int i = userMapper.updatePasswordByusername(username, passwordNew);
+        if (i>0){
+            rabbitTemplate.convertAndSend(Const.Routingkey.USERUPDATE,sessionID);
+        }
 
-        redisTemplateUtil.del(Const.objType.SESSION,""+sessionID);
         return ServiceResponse.createBySuccessMessage("修改密码成功");
     }
 
@@ -174,7 +180,7 @@ public class UserServiceImpl implements IUserService {
         }
         int i = userMapper.updatePasswordByusername(user.getUsername(), passwordNew);
         if(i>0){
-            redisTemplateUtil.del(Const.objType.SESSION,""+sessionID);
+            rabbitTemplate.convertAndSend(Const.Routingkey.USERUPDATE,sessionID);
             user.setPassword(passwordNew);
             return ServiceResponse.createBySuccessMessage("修改成功");
         }
@@ -199,11 +205,9 @@ public class UserServiceImpl implements IUserService {
 
         resultCount = userMapper.updateByPrimaryKeySelective(updateuser);
         if (resultCount>0){
-            redisTemplateUtil.del(Const.objType.SESSION,""+sessionID);
-
+            rabbitTemplate.convertAndSend(Const.Routingkey.USERUPDATE,sessionID);
             User newUser = userMapper.selectByPrimaryKey(user.getId());
             redisTemplateUtil.setEx(Const.objType.SESSION,""+sessionID,newUser,Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
-
             return ServiceResponse.createBySuccess("修改成功",updateuser);
         }
        return ServiceResponse.createByErrorMessage("修改失败");

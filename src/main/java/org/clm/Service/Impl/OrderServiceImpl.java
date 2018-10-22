@@ -36,6 +36,7 @@ import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
 import org.clm.util.*;
 import org.joda.time.DateTimeUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,8 @@ public class OrderServiceImpl implements IOrderService {
     private ShippingMapper shippingMapper;
     @Autowired
     private RedisTemplateUtil redisTemplateUtil;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     private static Log log = LogFactory.getLog(OrderServiceImpl.class);
 
@@ -311,6 +314,7 @@ public class OrderServiceImpl implements IOrderService {
      */
     @Override
     public ServiceResponse createOrder(Integer userId, Integer shippingId) {
+
         /**一辆车一种商品*/
         List<Cart> cartList = cartMapper.selectCartCheckedByUserId(userId);
 
@@ -338,10 +342,12 @@ public class OrderServiceImpl implements IOrderService {
         orderItemMapper.batchInsert(orderItemList);
 
         //减少产品库存
-        this.reduceOrIncreaseProductStock(orderItemList,true);
-
+        boolean result = this.reduceOrIncreaseProductStock(orderItemList, true);
+        if(!result){
+            return ServiceResponse.createByErrorMessage("库存不足");
+        }
         //清空一下购物车
-        this.clearCart(cartList);
+//        this.clearCart(cartList);
 
         //返回给前端数据
         OrderVo orderVo = this.createOrderVo(order,orderItemList);
@@ -539,7 +545,8 @@ public class OrderServiceImpl implements IOrderService {
             //取消订单没有被购买,返还库存
             int update = productMapper.updateByPrimaryKeySelective(product);
             if(update>0){
-                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
+                rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));
+//                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
             }
 
 //            Order order = orderMapper.selectByOrderNo(orderItem.getOrderNo());
@@ -698,7 +705,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     /**减少或增加库存 true减少,fasle返回增加*/
-    private void reduceOrIncreaseProductStock(List<OrderItem> orderItemList,boolean reduceOrIncrease) {
+    private boolean reduceOrIncreaseProductStock(List<OrderItem> orderItemList,boolean reduceOrIncrease) {
 
         for (OrderItem orderItem : orderItemList) {
              /*product = productMapper.selectByPrimaryKey(orderItem.getProductId());*/
@@ -711,7 +718,13 @@ public class OrderServiceImpl implements IOrderService {
             }
 
             if (reduceOrIncrease){
-                product.setStock(product.getStock()-orderItem.getQuantity());
+                int i = product.getStock() - orderItem.getQuantity();
+                if (i>=0){
+                    product.setStock(product.getStock()-orderItem.getQuantity());
+                }else {
+                    return false;
+                }
+
             }else{
                 product.setStock(product.getStock()+orderItem.getQuantity());
             }
@@ -720,9 +733,12 @@ public class OrderServiceImpl implements IOrderService {
             int update = productMapper.updateByPrimaryKeySelective(product);
             //删除redis商品详情缓存
             if( update > 0){
-                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
+                rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));
+//                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
             }
+
         }
+        return true;
     }
 
     public static void main(String[] args) {

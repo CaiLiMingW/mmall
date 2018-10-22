@@ -13,6 +13,12 @@ public class Const {
     public static final String EMAIL = "email";
     public static final String USERNAME = "username";
 
+    public class Routingkey {
+        public static final String PRODUCTUPDATE = "productDetail.update";
+        public static final String USERUPDATE = "user.update";
+        public static final String STOCKUPDATE = "stock.update";
+    }
+
     public class objType{
         public static final String CART = "Cart";
         public static final String CATRGORY = "Category";

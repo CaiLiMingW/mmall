@@ -12,6 +12,7 @@ import org.clm.common.ServiceResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,10 +45,13 @@ public class OrderController {
 
 
 
+
     @RequestMapping("/create.do")
     public ServiceResponse createOrder(HttpServletRequest request,Integer shippingId){
+
         User user = (User)request.getAttribute("user");
-        return iOrderService.createOrder(user.getId(),shippingId);
+
+        return iOrderService.createOrder(22,shippingId);
     }
 
     @RequestMapping("/get_order_cart_product.do")

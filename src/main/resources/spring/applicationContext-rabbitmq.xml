@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+        http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.3.xsd">
+
+    <!--1.连接-->
+    <rabbit:connection-factory id="rabbitConnectionFactory" virtual-host="clm"
+                               host="120.78.128.136" port="5672"
+                               username="clm" password="a3362266."/>
+
+    <!-- 2.MQ的管理，包括队列、交换器等 指定连接工厂-->
+    <rabbit:admin connection-factory="rabbitConnectionFactory" />
+
+    <!-- 3.定义交换器，自动声明 durable="false" 是否持久化 -->
+    <rabbit:topic-exchange name="PRODUCT-INFO-EXANGE" auto-declare="true" />
+
+    <!-- 4.定义队列，自动声明 durable="false" 是否持久化 -->
+    <rabbit:queue name="PRODUCT-DETAIL" auto-declare="true"/>
+    <!--队列和交换器绑定:界面中绑定-->
+
+    <!-- 5.定义Rabbit模板，指定连接工厂以及定义exchange(交换机) -->
+    <rabbit:template id="rabbitTemplate"  connection-factory="rabbitConnectionFactory" exchange="PRODUCT-INFO-EXANGE" />
+    <!-- <rabbit:template id="amqpTemplate" connection-factory="connectionFactory"
+        exchange="fanoutExchange" routing-key="foo.bar" /> -->
+    <bean id="redisUpdate" class="org.clm.SpringRabbitmq.RedisUpdate" />
+    <!-- 队列监听 -->
+    <rabbit:listener-container connection-factory="rabbitConnectionFactory">
+        <rabbit:listener ref="redisUpdate" method="updateProductRedis" queue-names="PRODUCT-DETAIL"   response-routing-key="productDetail.update"/>
+        <rabbit:listener ref="redisUpdate" method="updateProductStock" queue-names="STOCK-UPDATE" response-routing-key="stock.update"/>
+        <rabbit:listener ref="redisUpdate" method="updatrUserRedis" queue-names="USER-UPDATE" response-routing-key="user.update"/>
+    </rabbit:listener-container>
+
+
+
+
+
+
+    <!-- 队列监听 -->
+    <!--<rabbit:listener-container connection-factory="rabbitConnectionFactory">-->
+        <!--<rabbit:listener ref="rabbitmq" method="listen" queue-names="myQueue" />-->
+    <!--</rabbit:listener-container>-->
+    <!--<bean class="org.clm.rabbitmq.test.spring.Foo" id="rabbitmq" />-->
+
+    <!-- 4定义交换器，自动声明 durable="false" 是否持久化 -->
+    <!--<rabbit:topic-exchange name="PRODUCT-INFO-EXANGE" auto-declare="true" >-->
+    <!--<rabbit:bindings>-->
+    <!--<rabbit:binding queue="myQueue"/>-->
+    <!--</rabbit:bindings>-->
+    <!--</rabbit:topic-exchange>-->
+</beans>

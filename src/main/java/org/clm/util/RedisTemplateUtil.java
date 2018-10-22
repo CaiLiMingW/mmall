@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import redis.clients.jedis.Jedis;
 
 import java.util.List;
 import java.util.Set;

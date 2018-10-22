@@ -326,7 +326,18 @@
       <version>1.7.0</version>
     </dependency>
 
-    <!--spring session 单点登录-->
+    <!--spring-rabbit -->
+    <dependency>
+      <groupId>org.springframework.amqp</groupId>
+      <artifactId>spring-rabbit</artifactId>
+      <version>1.3.5.RELEASE</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.rabbitmq</groupId>
+      <artifactId>amqp-client</artifactId>
+      <version>3.4.1</version>
+    </dependency>
 
 
   </dependencies>

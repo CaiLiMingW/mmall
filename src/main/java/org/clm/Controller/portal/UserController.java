@@ -8,6 +8,7 @@ import org.clm.common.ServiceResponse;
 import org.clm.util.CookieUtil;
 import org.clm.util.RedisTemplateUtil;
 import org.joda.time.YearMonth;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,6 +31,9 @@ public class UserController {
 
     @Autowired
     private RedisTemplateUtil redisTemplateUtil;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     /**
      * 登录
      * @param username
@@ -63,7 +67,7 @@ public class UserController {
      */
     @RequestMapping(value = "/logout.do",method = RequestMethod.POST)
     public ServiceResponse<User> outlogin(HttpServletResponse responseCookie,HttpServletRequest request){
-            redisTemplateUtil.del(Const.objType.SESSION,request.getSession().getId());
+            rabbitTemplate.convertAndSend(Const.Routingkey.USERUPDATE,request.getSession().getId());
             CookieUtil.delLoginToken(request,responseCookie);
             return ServiceResponse.createBySuccess();
     }

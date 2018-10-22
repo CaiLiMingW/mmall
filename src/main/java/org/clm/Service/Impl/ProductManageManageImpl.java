@@ -14,9 +14,11 @@ import org.clm.VO.ProductListVo;
 import org.clm.common.Const;
 import org.clm.common.ResponseCode;
 import org.clm.common.ServiceResponse;
+import org.clm.util.JsonUtil;
 import org.clm.util.PropertiesUtil;
 import org.clm.util.RedisTemplateUtil;
 import org.clm.util.bak.RedisUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,8 @@ public class ProductManageManageImpl implements IProductManageService {
     private CategoryMapper categoryMapper;
     @Autowired
     private RedisTemplateUtil redisTemplateUtil;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public ServiceResponse saveOrUpdateProduct(Product product) {
@@ -50,13 +54,14 @@ public class ProductManageManageImpl implements IProductManageService {
             }
             int i = productMapper.updateByPrimaryKeySelective(product);
             if(i>0){
+                rabbitTemplate.convertAndSend(Const.Routingkey.PRODUCTUPDATE, JsonUtil.objToString(product));
                 //删除产品详情在redis中的缓存
-                redisTemplateUtil.del(Const.objType.PRODUCT, "" + product.getId());
-
-                //如果修改了价格
-                //删除商品列表详情缓存
-                redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO, "search");
-                redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO,""+pd.getCategoryId());
+//                redisTemplateUtil.del(Const.objType.PRODUCT, "" + product.getId());
+//
+//                //如果修改了价格
+//                //删除商品列表详情缓存
+//                redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO, "search");
+//                redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO,""+pd.getCategoryId());
 
 
                 return ServiceResponse.createBySucces("更新产品成功");
