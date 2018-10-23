@@ -17,7 +17,7 @@
 		<property name="user" value="${User}"/>
 		<property name="password" value="${Password}"/>
         <!--连接池中保留的最大连接数。Default: 15 -->
-        <property name="maxPoolSize" value="10"/>
+        <property name="maxPoolSize" value="${maxPoolSize}"/>
         <!--连接池中保留的最小连接数。 -->
         <property name="minPoolSize" value="3"/>
         <!--初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。Default: 3 -->
