@@ -346,6 +346,7 @@ public class OrderServiceImpl implements IOrderService {
         if(!result){
             return ServiceResponse.createByErrorMessage("库存不足");
         }
+
         //清空一下购物车
 //        this.clearCart(cartList);
 
@@ -708,34 +709,38 @@ public class OrderServiceImpl implements IOrderService {
     private boolean reduceOrIncreaseProductStock(List<OrderItem> orderItemList,boolean reduceOrIncrease) {
 
         for (OrderItem orderItem : orderItemList) {
-             /*product = productMapper.selectByPrimaryKey(orderItem.getProductId());*/
-            /*product.setStock(product.getStock()-orderItem.getQuantity());*/
-
-            //获取产品库存
-            Product product = redisTemplateUtil.get(Const.objType.PRODUCT, "" + orderItem.getProductId());
+            //获取产品库存redisTemplateUtil.get(Const.objType.PRODUCT, "" + orderItem.getProductId());
+            Product product = null;
             if (product==null){
                 product = productMapper.selectByPrimaryKey(orderItem.getProductId());
             }
-
             if (reduceOrIncrease){
-                int i = product.getStock() - orderItem.getQuantity();
-                if (i>=0){
-                    product.setStock(product.getStock()-orderItem.getQuantity());
-                }else {
-                    return false;
+                //将库存持久化到数据库
+                if ( product.getStock()-orderItem.getQuantity()>=0){
+                    int i = productMapper.reductStock(product.getId(), product.getStock(), orderItem.getQuantity());
+                    while (i != 1){
+                        product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+                        if ( product.getStock()-orderItem.getQuantity()>=0) {
+                            i = productMapper.reductStock(product.getId(), product.getStock(), orderItem.getQuantity());
+                            log.info("→数据不一致,重新更新");
+                        }else {
+                            i =1 ;
+                        }
+                    }
                 }
-
             }else{
-                product.setStock(product.getStock()+orderItem.getQuantity());
+                int i = productMapper.addStock(product.getId(), product.getStock(), orderItem.getQuantity());
+                while (i != 1){
+                    product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+                    i =  productMapper.addStock(product.getId(), product.getStock(), orderItem.getQuantity());
+                }
             }
 
-            //将库存持久化到数据库
-            int update = productMapper.updateByPrimaryKeySelective(product);
-            //删除redis商品详情缓存
-            if( update > 0){
-//                rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));
-//                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
-            }
+
+
+            //发送消息队列
+//          rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));
+//          redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
 
         }
         return true;

@@ -2,6 +2,7 @@ package org.clm.Dao;
 
 import com.github.pagehelper.PageInfo;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 import org.clm.Pojo.Product;
 import org.clm.VO.ProductListVo;
 import org.clm.common.ServiceResponse;
@@ -29,4 +30,9 @@ public interface ProductMapper {
     List<ProductListVo> selectProductBycategoryIdAndKeywordOrdeBy(@Param("categoryId") Integer categoryId,
                                                                   @Param("keyword") String keyword,
                                                                   @Param("orderBy") String orderBy);
+    @Update("update mmall_product set stock = #{stock}-#{quantity} where id = #{productId} and stock = #{stock}")
+    int reductStock(@Param("productId") Integer productId,@Param("stock") Integer stock,@Param("quantity") Integer quantity);
+
+    @Update("update mmall_product set stock = #{stock}+#{quantity} where id = #{productId} and stock = #{stock}")
+    int addStock(@Param("productId") Integer productId,@Param("stock") Integer stock,@Param("quantity") Integer quantity);
 }

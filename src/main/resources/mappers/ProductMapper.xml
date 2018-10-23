@@ -198,6 +198,7 @@
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
+    for update
   </update>
   <update id="updateByPrimaryKey" parameterType="org.clm.Pojo.Product" >
     update mmall_product
