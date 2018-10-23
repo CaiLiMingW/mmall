@@ -27,7 +27,7 @@ public class closeOrderTask {
     private RabbitTemplate rabbitTemplate;
 
     private static final Logger log = LoggerFactory.getLogger(closeOrderTask.class);
-    @Scheduled(cron="0 0/10 * * * ? ")
+    @Scheduled(cron="0 0/1 * * * ? ")
     public void closeOrderTaskv(){
         //TODO 定时关单
 
@@ -41,16 +41,10 @@ public class closeOrderTask {
     }
 
 //    @Scheduled(cron="0 0 0 1 * ? ")
-@Scheduled(cron="0 0 1 * * ? ")
+@Scheduled(cron="0 0 0 1 * ? ")
     public void delCloseOrderTask(){
         iOrderService.dedelCloseOrderTask();
+        log.info("定时删除订单");
     }
 
-    public static void main(String[] args) {
-        int s = Integer.parseInt("1");
-        String property = PropertiesUtil.getProperty("close.order.time");
-        int xx = Integer.parseInt(property);
-        int x = Integer.valueOf(PropertiesUtil.getProperty("close.order.time","2")).intValue();
-        int hour = Integer.parseInt(PropertiesUtil.getProperty("close.order.time"));
-    }
 }
