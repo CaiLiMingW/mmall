@@ -31,9 +31,9 @@
     <bean id="redisUpdate" class="org.clm.SpringRabbitmq.RedisUpdate" />
     <!-- 队列监听 -->
     <rabbit:listener-container connection-factory="rabbitConnectionFactory">
-        <rabbit:listener ref="redisUpdate" method="updateProductRedis" queue-names="PRODUCT-DETAIL"   response-routing-key="productDetail.update"/>
-        <rabbit:listener ref="redisUpdate" method="updateProductStock" queue-names="STOCK-UPDATE" response-routing-key="stock.update"/>
-        <rabbit:listener ref="redisUpdate" method="updatrUserRedis" queue-names="USER-UPDATE" response-routing-key="user.update"/>
+        <!--<rabbit:listener ref="redisUpdate" method="updateProductRedis" queue-names="PRODUCT-DETAIL"   response-routing-key="productDetail.update"/>-->
+        <!--<rabbit:listener ref="redisUpdate" method="updateProductStock" queue-names="STOCK-UPDATE" response-routing-key="stock.update"/>-->
+        <!--<rabbit:listener ref="redisUpdate" method="updatrUserRedis" queue-names="USER-UPDATE" response-routing-key="user.update"/>-->
     </rabbit:listener-container>
 
 

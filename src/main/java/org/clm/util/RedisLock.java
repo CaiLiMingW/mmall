@@ -19,7 +19,7 @@ import java.sql.Time;
 public class RedisLock {
     private static final Logger log = LoggerFactory.getLogger(RedisLock.class);
 
-    private static final int TIMEOUT = 1200;
+    private static final int TIMEOUT = 800;
     @Autowired
     private RedisTemplateUtil redisTemplateUtil;
 
@@ -37,7 +37,7 @@ public class RedisLock {
                 //
                 if (lockValue2 != null || lockValue1.equals(lockValue2)){
                     redisTemplateUtil.expire(Const.objType.LOCK,key,TIMEOUT);
-                    log.info("\n========死锁{}:重置生存时间=======",Thread.currentThread().getId());
+                    log.info("\n========{}:重置生存时间=======",Thread.currentThread().getId());
                 }else {
                     log.info("\n!=======lockValue1.equals(lockValue2)=======");
                     return false;

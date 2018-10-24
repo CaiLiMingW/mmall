@@ -5,6 +5,7 @@ import org.clm.Pojo.Product;
 import org.clm.Service.IOrderService;
 import org.clm.common.Const;
 import org.clm.util.PropertiesUtil;
+import org.clm.util.RedisLock;
 import org.clm.util.RedisTemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,26 +31,35 @@ public class closeOrderTask {
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private RedisTemplateUtil redisTemplateUtil;
+    @Autowired
+    private RedisLock redisLock;
 
     private static final Logger log = LoggerFactory.getLogger(closeOrderTask.class);
     @Scheduled(cron="0 0/1 * * * ? ")
     public void closeOrderTaskv(){
-        //TODO 定时关单
-
-            //RabbitMQ模板
-            //发送消息
-//        rabbitTemplate.convertAndSend("Hello, world!");
-        int hour = Integer.parseInt(PropertiesUtil.getProperty("close.order.time"));
-        iOrderService.closeOrderTask(hour);
-        System.out.println(1);
-        log.info("定时任务");
+        //RabbitMQ模板
+        //发送消息
+        boolean lock = redisLock.setLock("closeorder");
+        if (lock){
+            int hour = Integer.parseInt(PropertiesUtil.getProperty("close.order.time"));
+            iOrderService.closeOrderTask(hour);
+            System.out.println(1);
+            log.info("定时任务");
+        }else {
+            log.info("其他进程执行关单");
+        }
     }
 
-//    @Scheduled(cron="0 0 0 1 * ? ")
-@Scheduled(cron="0 0 0 1 * ? ")
+    //@Scheduled(cron="0 0 0 1 * ? ")
+    @Scheduled(cron="0 0/2 * * * ? ")
     public void delCloseOrderTask(){
-        iOrderService.dedelCloseOrderTask();
-        log.info("定时删除订单");
-    }
+        boolean lock = redisLock.setLock("deltask");
+        if (lock){
+            iOrderService.dedelCloseOrderTask();
+            log.info("定时删除订单");
+        }else {
+            log.info("其他进程执行删单");
+        }
 
+    }
 }
