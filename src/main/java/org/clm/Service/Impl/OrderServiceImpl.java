@@ -736,7 +736,7 @@ public class OrderServiceImpl implements IOrderService {
                 }
             }
 
-
+            redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
 
             //发送消息队列
 //          rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));

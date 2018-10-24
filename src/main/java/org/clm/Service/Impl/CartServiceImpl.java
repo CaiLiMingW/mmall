@@ -71,11 +71,7 @@ public class CartServiceImpl implements ICartService {
             resultUpdate = cartMapper.updateByPrimaryKeySelective(cart);
         }
 
-        //成功加入购物车后:预减缓存中的产品库存
-//        if (resultInsert > 0 || resultUpdate > 0){
-//            product.setStock(product.getStock()-count);
-//            redisTemplateUtil.set(Const.objType.PRODUCT,""+productId,product);
-//        }
+
 
         return this.getCartProductList(user);
     }

@@ -1,8 +1,11 @@
 package org.clm.Controller.common.task;
 
 import com.rabbitmq.client.ConnectionFactory;
+import org.clm.Pojo.Product;
 import org.clm.Service.IOrderService;
+import org.clm.common.Const;
 import org.clm.util.PropertiesUtil;
+import org.clm.util.RedisTemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -25,6 +28,8 @@ public class closeOrderTask {
     private IOrderService iOrderService;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
 
     private static final Logger log = LoggerFactory.getLogger(closeOrderTask.class);
     @Scheduled(cron="0 0/1 * * * ? ")

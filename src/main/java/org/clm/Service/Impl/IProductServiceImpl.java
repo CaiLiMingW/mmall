@@ -9,9 +9,14 @@ import org.clm.Service.IProductService;
 import org.clm.VO.ProductListVo;
 import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
+import org.clm.util.RedisLock;
 import org.clm.util.RedisTemplateUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,36 +27,56 @@ import java.util.List;
  */
 @Service
 public class IProductServiceImpl implements IProductService {
+    private final static Logger log = LoggerFactory.getLogger(IProductServiceImpl.class);
     @Autowired
     private ProductMapper productMapper;
 
     @Autowired
     private RedisTemplateUtil redisTemplateUtil;
 
+    @Autowired
+    private RedisLock redisLock;
+
     @Override
     public ServiceResponse getProductDetail(Integer productId) {
         if (productId==null){
             return ServiceResponse.createByErrorMessage("产品ID错误");
         }
-
-        Product product = redisTemplateUtil.get(Const.objType.PRODUCT,""+productId);
-
-        List s = new ArrayList();
-        s.add("1");
-        s.add("2");
-        redisTemplateUtil.lsetx("1","2",s);
         //从缓存获取product
+        Product product = redisTemplateUtil.get(Const.objType.PRODUCT,""+productId);
 
         //若为Null，从数据库取最新数据,并更新到缓存中
         if (product==null){
-            product = productMapper.selectByPrimaryKey(productId);
-            redisTemplateUtil.set(Const.objType.PRODUCT,""+productId,product);
-            /*RedisUtil.set(Const.objType.PRODUCT,""+productId,product);*/
-        }
+            log.info("\n缓存被清空,从数据库获取数据");
+            boolean b = redisLock.setLock(Const.objType.PRODUCT);
+            if (b){
+                log.info("\n当前线程获取锁,查询数据并存入缓存");
+                product = productMapper.selectByPrimaryKey(productId);
+                redisTemplateUtil.set(Const.objType.PRODUCT,""+productId,product);
+                boolean b1 = redisLock.delLock(Const.objType.PRODUCT);
 
-        //如果product还为NULL，则可能数据库不存在该商品
-        if (product==null){
-            return ServiceResponse.createByErrorMessage("该商品已下架或删除");
+            }else {
+                log.info("\n→→线程:{},锁状态,进入休眠",Thread.currentThread().getId());
+                try {
+                    //取锁失败,已有线程在执行该模块代码，休眠0.5秒后再从缓存中取信息
+                    Thread.sleep(300);
+                    for(int i=0;i <6 ; i++){
+                        product = redisTemplateUtil.get(Const.objType.PRODUCT,""+productId);
+                        Thread.sleep(150);
+                        log.info("\n线程{}:循环{}次,",Thread.currentThread().getId(),i+1);
+                    }
+                    product = productMapper.selectByPrimaryKey(productId);
+                    redisTemplateUtil.set(Const.objType.PRODUCT,""+productId,product);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    log.error("线程休眠出错:{}",e);
+                }
+
+            }
+            //如果product还为NULL，则可能数据库不存在该商品
+            if (product==null){
+                return ServiceResponse.createByErrorMessage("该商品已下架或删除");
+            }
         }
         return ServiceResponse.createBySucces(product);
     }
@@ -60,33 +85,44 @@ public class IProductServiceImpl implements IProductService {
     public ServiceResponse getProductList( Integer categoryId, Integer pageNum, Integer pageSize, String keyword, String orderBy) {
         PageHelper.startPage(pageNum,pageSize);
         PageInfo pageInfo = null;
+        String key = null;
         if (StringUtils.isNotBlank(orderBy)){
             orderBy = StringUtils.equals("price_desc",orderBy)?Const.OrderBy.PRICE_DESC:Const.OrderBy.PRICE_ASC;
         }
-        if (categoryId==null){
+        key = "" + (categoryId==null?"search":categoryId) + pageNum + pageSize + keyword+orderBy;
+        pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
 
-        }
-        pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,
-                "" + (categoryId==null?"search":categoryId) + pageNum + pageSize + keyword+orderBy);
-      /*  List<ProductListVo> productListVos = redisTemplateUtil.lget(Const.objType.PRODOCTLISTVO,
-                                                     ""+categoryId+pageNum+pageSize+keyword+orderBy);*/
-        /*productListVos = RedisUtil.getList(Const.objType.PRODOCTLISTVO,
-                "" + categoryId + pageNum + pageSize + keyword+orderBy,
-                new TypeReference<List<ProductListVo>>() {
-        });*/
 
         if(pageInfo==null){
+            boolean b = redisLock.setLock(Const.objType.PRODOCTLISTVO);
+            if (b){
+                List<ProductListVo> productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword, orderBy);
+                pageInfo = new PageInfo(productListVos);
+                redisTemplateUtil.set(Const.objType.PRODOCTLISTVO,key,pageInfo);
+            }else {
+                try {
+                    //取锁失败,已有线程在执行该模块代码，休眠0.5秒后再从缓存中取信息
+                    Thread.sleep(300);
+                    for(int i=0;i <6 ; i++){
+                        pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
+                        Thread.sleep(150);
+                        log.info("\n线程{}:循环{}次,",Thread.currentThread().getId(),i+1);
+                    }
+                    log.info("\n→→线程:{}取锁失败,休眠",Thread.currentThread().getId());
+                    pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    log.error("线程休眠出错:{}",e);
+                }
+            }
 
-            List<ProductListVo> productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword, orderBy);
-            pageInfo = new PageInfo(productListVos);
-            redisTemplateUtil.set(Const.objType.PRODOCTLISTVO,""+(categoryId==null?"search":categoryId)+pageNum+pageSize+keyword+orderBy,pageInfo);
-            /*redisTemplateUtil.lset(Const.objType.PRODOCTLISTVO,
-                    ""+categoryId+pageNum+pageSize+keyword+orderBy,productListVos);*/
+            if (pageInfo==null){
+                return ServiceResponse.createByErrorMessage("参数错误");
+            }
+
         }
 
-        if (pageInfo==null){
-            return ServiceResponse.createByErrorMessage("参数错误");
-        }
+
         return ServiceResponse.createBySucces(pageInfo);
     }
 }

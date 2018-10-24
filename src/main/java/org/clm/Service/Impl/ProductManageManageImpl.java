@@ -56,12 +56,12 @@ public class ProductManageManageImpl implements IProductManageService {
             if(i>0){
                 rabbitTemplate.convertAndSend(Const.Routingkey.PRODUCTUPDATE, JsonUtil.objToString(product));
                 //删除产品详情在redis中的缓存
-//                redisTemplateUtil.del(Const.objType.PRODUCT, "" + product.getId());
+                redisTemplateUtil.del(Const.objType.PRODUCT, "" + product.getId());
 //
 //                //如果修改了价格
 //                //删除商品列表详情缓存
-//                redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO, "search");
-//                redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO,""+pd.getCategoryId());
+               redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO, "search");
+               redisTemplateUtil.delByKey(Const.objType.PRODOCTLISTVO,""+pd.getCategoryId());
 
 
                 return ServiceResponse.createBySucces("更新产品成功");

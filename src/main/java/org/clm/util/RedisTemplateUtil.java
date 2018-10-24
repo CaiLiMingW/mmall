@@ -6,9 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.connection.ConnectionUtils;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
@@ -85,6 +88,18 @@ public class RedisTemplateUtil {
         }
     }
 
+//    public <T> boolean set(String objType, String key,T obj){
+//        key = objType+""+key;
+//        try {
+//            /*value = JsonUtil.objToString(obj);*/
+//            redisTemplate.opsForValue().setNX(key,obj);
+//            return true;
+//        }catch (Exception e){
+//            log.info("\n=========set:errer==========\n{}\n",e);
+//            return false;
+//        }
+//    }
+
     public <T> boolean setEx(String objType, String key,T obj,int timeout){
         key = objType+""+key;
         try {
@@ -127,9 +142,11 @@ public class RedisTemplateUtil {
             Set keys = redisTemplate.keys(key + "*");
             /*value = JsonUtil.objToString(obj);*/
             redisTemplate.delete(redisTemplate.keys(key+"*"));
+            redisTemplate.exec();
+
             return true;
         }catch (Exception e){
-            log.info("\n=========del:errer==========\n{}\n",e);
+            log.info("\n=========delByKey:errer==========\n{}\n",e);
             return false;
         }
     }
@@ -137,11 +154,39 @@ public class RedisTemplateUtil {
     public boolean expire(String objType, String key, int timeout) {
         key = objType+""+key;
         try {
-            redisTemplate.expire(key,timeout, TimeUnit.SECONDS);
+            redisTemplate.expire(key,timeout, TimeUnit.MILLISECONDS);
             return true;
         }catch (Exception e){
-            log.info("\n=========del:errer==========\n{}\n",e);
+            log.info("\n=========expire:errer==========\n{}\n",e);
             return false;
         }
     }
+
+    public <T> boolean setNX(String objType, String key,T obj) {
+        key = objType+""+key;
+        Boolean reulst = false;
+        try {
+            reulst = redisTemplate.opsForValue().setIfAbsent(key, obj);
+            return reulst;
+        }catch (Exception e){
+            log.info("\n=========setNX:errer==========\n{}\n",e);
+            return reulst;
+        }finally {
+            redisTemplate.getConnectionFactory().getConnection().close();
+        }
+    }
+    public <T> T getset(String objType, String key,T obj) {
+        key = objType+""+key;
+        T result = null;
+        try {
+            Object andSet = redisTemplate.opsForValue().getAndSet(key, obj);
+            result = (T)redisTemplate.opsForValue().get(key);
+            redisTemplate.opsForValue().set(key,obj);
+            return result;
+        }catch (Exception e){
+            log.info("\n=========getset:errer==========\n{}\n",e);
+            return result;
+        }
+    }
+
 }

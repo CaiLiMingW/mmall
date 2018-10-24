@@ -29,11 +29,13 @@ public class Const {
         public static final String USER = "User";
         public static final String SESSION = StringUtils.EMPTY;
         public static final String PRODOCTLISTVO = "productListVos";
+        public static final String LOCK = "lock";
 
 
     }
     public interface RedisCacheExtime{
-        int REDIS_SESSION_EXTIME = 60*30;
+        int REDIS_SESSION_EXTIME = 60*30*1000;
+        int REDIS_LOCK_EXTIME = 500;
     }
 
     public interface OrderBy{
