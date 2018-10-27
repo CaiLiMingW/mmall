@@ -63,9 +63,6 @@ public class OrderController {
         map.put("userId",user.getId());
         map.put("shippingId",shippingId);
 
-//        Order ordermessage = new Order();
-//        ordermessage.setUserId(user.getId());
-//        ordermessage.setShippingId(shippingId);
         //将订单请求发送到消息队列
         rabbitTemplate.convertAndSend(Const.Routingkey.ORDERMESSAGE, JsonUtil.objToString(map));
         //return iOrderService.createOrder(22,shippingId);
