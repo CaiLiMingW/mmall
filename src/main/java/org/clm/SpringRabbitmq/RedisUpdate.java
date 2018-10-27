@@ -60,6 +60,7 @@ public class RedisUpdate implements ChannelAwareMessageListener{
         //Order orderMessage = JsonUtil.StringToObj(strJson,Order.class);
         Integer userId = (Integer) map.get("userId");
         Integer shippingId = (Integer) map.get("shippingId");
+        Long key = (Long) map.get("key");
 
         /**一辆车一种商品*/
         List<Cart> cartList = cartMapper.selectCartCheckedByUserId(userId);
@@ -108,6 +109,8 @@ public class RedisUpdate implements ChannelAwareMessageListener{
 
         //返回给前端数据
         OrderVo orderVo = this.createOrderVo(order,orderItemList);
+        //把订单信息对象存放到redis缓存中
+        redisTemplateUtil.setEx(Const.objType.ORDER,""+userId+shippingId+key,orderVo,Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
     }
 
     //Routingkey productDetail.update

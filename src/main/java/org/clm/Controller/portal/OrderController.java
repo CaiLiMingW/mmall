@@ -13,6 +13,7 @@ import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
 
 import org.clm.util.JsonUtil;
+import org.clm.util.RedisTemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -46,6 +47,8 @@ public class OrderController {
     private IOrderService iOrderService;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RedisTemplateUtil redisTemplateUtil;
 
 
 
@@ -62,11 +65,33 @@ public class OrderController {
         Map map = new HashMap();
         map.put("userId",user.getId());
         map.put("shippingId",shippingId);
-
+        map.put("key",System.currentTimeMillis());
+        //todo 订单号问题
         //将订单请求发送到消息队列
         rabbitTemplate.convertAndSend(Const.Routingkey.ORDERMESSAGE, JsonUtil.objToString(map));
-        //return iOrderService.createOrder(22,shippingId);
-        return ServiceResponse.createBySuccess("排队中",new OrderVo());
+
+        OrderVo orderVo = redisTemplateUtil.get(Const.objType.ORDER, "" + user.getId() + shippingId + map.get("key"));
+        if (orderVo==null){
+            //todo 修改定时任务
+            for (int i = 0; i <11 ; i++) {
+                try {
+                    Thread.sleep(300);
+                    orderVo = redisTemplateUtil.get(Const.objType.ORDER, "" + user.getId() + shippingId + map.get("key"));
+                    if(i==10){
+                        return ServiceResponse.createByErrorMessage("订单出错,请稍后重试试");
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (orderVo!=null){
+                    return ServiceResponse.createBySuccess("提交成功",orderVo);
+                }
+            }
+
+        }
+
+        return ServiceResponse.createBySuccess("提交成功",orderVo);
+        //return iOrderService.createOrder(user.getID(),shippingId);
     }
 
     @RequestMapping("/get_order_cart_product.do")
