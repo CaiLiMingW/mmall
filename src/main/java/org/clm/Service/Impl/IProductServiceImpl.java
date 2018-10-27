@@ -1,5 +1,6 @@
 package org.clm.Service.Impl;
 
+import ch.qos.logback.classic.turbo.TurboFilter;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +21,8 @@ import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * @author Ccc
@@ -36,6 +39,7 @@ public class IProductServiceImpl implements IProductService {
 
     @Autowired
     private RedisLock redisLock;
+
 
     @Override
     public ServiceResponse getProductDetail(Integer productId) {
@@ -54,20 +58,34 @@ public class IProductServiceImpl implements IProductService {
                 product = productMapper.selectByPrimaryKey(productId);
                 redisTemplateUtil.set(Const.objType.PRODUCT,""+productId,product);
                 boolean b1 = redisLock.delLock(Const.objType.PRODUCT);
-
             }else {
                 log.info("\n→→线程:{},锁状态,进入休眠",Thread.currentThread().getId());
+                //todo 定时任务修改 thread.sleep?
                 try {
-                    //取锁失败,已有线程在执行该模块代码，休眠0.5秒后再从缓存中取信息
-                    Thread.sleep(300);
-                    for(int i=0;i <6 ; i++){
-                        product = redisTemplateUtil.get(Const.objType.PRODUCT,""+productId);
-                        Thread.sleep(150);
-                        log.info("\n线程{}:循环{}次,",Thread.currentThread().getId(),i+1);
+                    boolean loop = true;
+                    for (Long i = System.currentTimeMillis();loop; i++) {
+                        if (System.currentTimeMillis()-i>=50){
+                            int j = 50;
+                            log.info("\n线程{}:循环中{}毫秒,",Thread.currentThread().getId(),j+=50);
+                            i = System.currentTimeMillis();
+                            if(!redisTemplateUtil.haskey(Const.objType.LOCK,Const.objType.PRODUCT)){
+                                product = redisTemplateUtil.get(Const.objType.PRODUCT,""+productId);
+                                if(product!=null){
+                                    loop = false;
+                                }
+                            }
+                        }
                     }
+                    //取锁失败,已有线程在执行该模块代码，休眠0.5秒后再从缓存中取信息
+//                    Thread.sleep(300);
+//                    for(int i=0;i <6 ; i++){
+//
+//                        Thread.sleep(150);
+//                        log.info("\n线程{}:循环{}次,",Thread.currentThread().getId(),i++);
+//                    }
                     product = productMapper.selectByPrimaryKey(productId);
                     redisTemplateUtil.set(Const.objType.PRODUCT,""+productId,product);
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     log.error("线程休眠出错:{}",e);
                 }
@@ -99,6 +117,7 @@ public class IProductServiceImpl implements IProductService {
                 List<ProductListVo> productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword, orderBy);
                 pageInfo = new PageInfo(productListVos);
                 redisTemplateUtil.set(Const.objType.PRODOCTLISTVO,key,pageInfo);
+                redisLock.delLock(Const.objType.PRODOCTLISTVO);
             }else {
                 try {
                     //取锁失败,已有线程在执行该模块代码，休眠0.5秒后再从缓存中取信息
@@ -125,4 +144,20 @@ public class IProductServiceImpl implements IProductService {
 
         return ServiceResponse.createBySucces(pageInfo);
     }
+
+    public static void main(String[] args) {
+        boolean loop = true;
+        int j = 5000;
+        for (Long i = System.currentTimeMillis();loop; i++) {
+            if (System.currentTimeMillis()-i>=5000){
+                System.out.println(j+=500);
+                log.info("\n线程{}:循环中{}毫秒,",Thread.currentThread().getId(),j+=50);
+                i = System.currentTimeMillis();
+                if (j==200){
+                    loop =false;
+                }
+                }
+            }
+        }
+
 }

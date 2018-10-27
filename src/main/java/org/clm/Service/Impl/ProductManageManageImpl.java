@@ -54,7 +54,7 @@ public class ProductManageManageImpl implements IProductManageService {
             }
             int i = productMapper.updateByPrimaryKeySelective(product);
             if(i>0){
-                rabbitTemplate.convertAndSend(Const.Routingkey.PRODUCTUPDATE, JsonUtil.objToString(product));
+//                rabbitTemplate.convertAndSend(Const.Routingkey.PRODUCTUPDATE, JsonUtil.objToString(product));
                 //删除产品详情在redis中的缓存
                 redisTemplateUtil.del(Const.objType.PRODUCT, "" + product.getId());
 //

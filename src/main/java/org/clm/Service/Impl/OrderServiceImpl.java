@@ -308,12 +308,16 @@ public class OrderServiceImpl implements IOrderService {
 
     /**
      * 流程: userId,shippingId → Cart → OrderItem → Order
-     * @param userId
-     * @param shippingId
+     * @param
+     * @param
      * @return
      */
     @Override
-    public ServiceResponse createOrder(Integer userId, Integer shippingId) {
+    public ServiceResponse createOrder(String orderMessageStr) {
+
+        Order orderMessage = JsonUtil.StringToObj(orderMessageStr, Order.class);
+        Integer userId = orderMessage.getUserId();
+        Integer shippingId = orderMessage.getShippingId();
 
         /**一辆车一种商品*/
         List<Cart> cartList = cartMapper.selectCartCheckedByUserId(userId);
@@ -523,7 +527,9 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public void closeOrderTask(int hour) {
+    public void closeOrderTask(int hour)
+
+    {
         //当前时间的hour前
         Date closeTime = DateUtils.addHours(new Date(),-hour);
         String s = DateTimeUtil.dateToStr(closeTime);
@@ -546,8 +552,8 @@ public class OrderServiceImpl implements IOrderService {
             //取消订单没有被购买,返还库存
             int update = productMapper.updateByPrimaryKeySelective(product);
             if(update>0){
-                rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));
-//                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
+//                rabbitTemplate.convertAndSend(Const.Routingkey.STOCKUPDATE,JsonUtil.objToString(orderItem));
+                redisTemplateUtil.del(Const.objType.PRODUCT,""+orderItem.getProductId());
             }
 
 //            Order order = orderMapper.selectByOrderNo(orderItem.getOrderNo());

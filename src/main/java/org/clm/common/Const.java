@@ -17,6 +17,7 @@ public class Const {
         public static final String PRODUCTUPDATE = "productDetail.update";
         public static final String USERUPDATE = "user.update";
         public static final String STOCKUPDATE = "stock.update";
+        public static final String ORDERMESSAGE = "order.message";
     }
 
     public class objType{

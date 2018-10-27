@@ -29,8 +29,9 @@
     <!-- <rabbit:template id="amqpTemplate" connection-factory="connectionFactory"
         exchange="fanoutExchange" routing-key="foo.bar" /> -->
     <bean id="redisUpdate" class="org.clm.SpringRabbitmq.RedisUpdate" />
-    <!-- 队列监听 -->
-    <rabbit:listener-container connection-factory="rabbitConnectionFactory">
+    <!-- 队列监听  手动应答-->
+    <rabbit:listener-container connection-factory="rabbitConnectionFactory" acknowledge="manual">
+        <rabbit:listener ref="redisUpdate"  queue-names="ORDER-MESSAGE" />
         <!--<rabbit:listener ref="redisUpdate" method="updateProductRedis" queue-names="PRODUCT-DETAIL"   response-routing-key="productDetail.update"/>-->
         <!--<rabbit:listener ref="redisUpdate" method="updateProductStock" queue-names="STOCK-UPDATE" response-routing-key="stock.update"/>-->
         <!--<rabbit:listener ref="redisUpdate" method="updatrUserRedis" queue-names="USER-UPDATE" response-routing-key="user.update"/>-->

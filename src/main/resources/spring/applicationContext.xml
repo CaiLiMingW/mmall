@@ -14,8 +14,9 @@
     </context:component-scan>
     <context:component-scan base-package="org.clm.rabbitmq" />
 
+    <!--扫描Spring Scheduled注解-->
     <task:annotation-driven />
-    <!---->
+
     <aop:aspectj-autoproxy/>
 
     <!--redis-->

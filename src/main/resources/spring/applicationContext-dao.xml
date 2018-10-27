@@ -49,40 +49,41 @@
 		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
 		<constructor-arg name="executorType" value="BATCH"/>
 	</bean>
---> <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig" >
-	<property name="maxIdle" value="${redis.max.idle}"/>
-	<property name="maxTotal" value="${redis.max.total}"/>
-	<property name="minIdle" value="${redis.min.idle}"/>
-    <property name="minEvictableIdleTimeMillis" value="${redis.minEvictableIdleTimeMillis}"/>
-	<property name="timeBetweenEvictionRunsMillis" value="${redis.timeBetweenEvictionRunsMillis}"/>
-    <property name="testOnReturn" value="${redis.test.return}"/>
-	<property name="testOnBorrow" value="${redis.test.borrow}"/>
-    </bean>
+	-->
+    <!--<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig" >-->
+	<!--<property name="maxIdle" value="${redis.max.idle}"/>-->
+	<!--<property name="maxTotal" value="${redis.max.total}"/>-->
+	<!--<property name="minIdle" value="${redis.min.idle}"/>-->
+    <!--<property name="minEvictableIdleTimeMillis" value="${redis.minEvictableIdleTimeMillis}"/>-->
+	<!--<property name="timeBetweenEvictionRunsMillis" value="${redis.timeBetweenEvictionRunsMillis}"/>-->
+    <!--<property name="testOnReturn" value="${redis.test.return}"/>-->
+	<!--<property name="testOnBorrow" value="${redis.test.borrow}"/>-->
+    <!--</bean>-->
 
-	<bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" >
-		<property name="poolConfig" ref="jedisPoolConfig"/>
-		<property name="hostName" value="${redis1.ip}"/>
-		<property name="port" value="${redis1.port}"/>
-		<property name="timeout" value="${redis.time.out}"/>
-	</bean>
+	<!--<bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" >-->
+		<!--<property name="poolConfig" ref="jedisPoolConfig"/>-->
+		<!--<property name="hostName" value="${redis1.ip}"/>-->
+		<!--<property name="port" value="${redis1.port}"/>-->
+		<!--<property name="timeout" value="${redis.time.out}"/>-->
+	<!--</bean>-->
 
-	<bean id="redisTemplate"  class="org.springframework.data.redis.core.RedisTemplate">
-		<property name="connectionFactory" ref="connectionFactory"/>
-		<property name="keySerializer" >
-			<bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
-		</property>
-		<property name="valueSerializer" >
-			<bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer" />
-		</property>
-		<property name="hashKeySerializer">
-			<bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
-		</property>
-		<property name="hashValueSerializer">
-			<bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer"/>
-		</property>
-		<!-- ;开启事务 ;-->
-		<!--<property name="enableTransactionSupport" value="true"></property>-->
-	</bean>
+	<!--<bean id="redisTemplate"  class="org.springframework.data.redis.core.RedisTemplate">-->
+		<!--<property name="connectionFactory" ref="connectionFactory"/>-->
+		<!--<property name="keySerializer" >-->
+			<!--<bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />-->
+		<!--</property>-->
+		<!--<property name="valueSerializer" >-->
+			<!--<bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer" />-->
+		<!--</property>-->
+		<!--<property name="hashKeySerializer">-->
+			<!--<bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>-->
+		<!--</property>-->
+		<!--<property name="hashValueSerializer">-->
+			<!--<bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer"/>-->
+		<!--</property>-->
+		<!--&lt;!&ndash; ;开启事务 ;&ndash;&gt;-->
+		<!--&lt;!&ndash;<property name="enableTransactionSupport" value="true"></property>&ndash;&gt;-->
+	<!--</bean>-->
 
 
 </beans>

@@ -1,5 +1,6 @@
 package org.clm.Controller.common.task;
 
+import com.google.gson.Gson;
 import com.rabbitmq.client.ConnectionFactory;
 import org.clm.Pojo.Product;
 import org.clm.Service.IOrderService;
@@ -16,6 +17,8 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import proxy.inteface.Animal;
+import proxy.inteface.tiger;
 
 
 /**
@@ -44,7 +47,8 @@ public class closeOrderTask {
             int hour = Integer.parseInt(PropertiesUtil.getProperty("close.order.time"));
             iOrderService.closeOrderTask(hour);
             System.out.println(1);
-            log.info("定时任务");
+            log.info("定时关单");
+            redisLock.delLock("closeorder");
         }else {
             log.info("其他进程执行关单");
         }
@@ -57,9 +61,19 @@ public class closeOrderTask {
         if (lock){
             iOrderService.dedelCloseOrderTask();
             log.info("定时删除订单");
+            redisLock.delLock("deltask");
         }else {
             log.info("其他进程执行删单");
         }
 
     }
+
+//    @Scheduled(cron="*/5 * * * * ? ")
+//    public void apsectest(){
+//        int i = 1;
+//        Animal tiger = new tiger();
+//        tiger.eat();
+//        tiger.speak();
+//        System.out.println(i++);
+//    }
 }

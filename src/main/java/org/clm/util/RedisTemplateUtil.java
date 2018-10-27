@@ -165,6 +165,7 @@ public class RedisTemplateUtil {
     public <T> boolean setNX(String objType, String key,T obj) {
         key = objType+""+key;
         Boolean reulst = false;
+
         try {
             reulst = redisTemplate.opsForValue().setIfAbsent(key, obj);
             return reulst;
@@ -179,12 +180,21 @@ public class RedisTemplateUtil {
         key = objType+""+key;
         T result = null;
         try {
-            Object andSet = redisTemplate.opsForValue().getAndSet(key, obj);
-            result = (T)redisTemplate.opsForValue().get(key);
-            redisTemplate.opsForValue().set(key,obj);
+            result = (T)redisTemplate.opsForValue().getAndSet(key, obj);
             return result;
         }catch (Exception e){
             log.info("\n=========getset:errer==========\n{}\n",e);
+            return result;
+        }
+    }
+    public Boolean haskey(String objType, String key) {
+        key = objType+""+key;
+        Boolean result = false;
+        try {
+            result = redisTemplate.hasKey(key);
+            return result;
+        }catch (Exception e){
+            log.info("\n=========haskey:errer==========\n{}\n",e);
             return result;
         }
     }

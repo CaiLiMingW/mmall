@@ -67,7 +67,8 @@ public class UserController {
      */
     @RequestMapping(value = "/logout.do",method = RequestMethod.POST)
     public ServiceResponse<User> outlogin(HttpServletResponse responseCookie,HttpServletRequest request){
-            rabbitTemplate.convertAndSend(Const.Routingkey.USERUPDATE,request.getSession().getId());
+        redisTemplateUtil.del(Const.objType.SESSION,request.getSession().getId());
+//        rabbitTemplate.convertAndSend(Const.Routingkey.USERUPDATE,request.getSession().getId());
             CookieUtil.delLoginToken(request,responseCookie);
             return ServiceResponse.createBySuccess();
     }

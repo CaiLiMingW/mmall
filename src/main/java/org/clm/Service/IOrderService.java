@@ -16,8 +16,8 @@ public interface IOrderService {
     ServiceResponse alipayCallback(HttpServletRequest request);
 
     ServiceResponse getOrderPayStatus(Long orderNo);
-
-    ServiceResponse createOrder(Integer userId, Integer shippingId);
+//    ServiceResponse createOrder(Integer userId, Integer shippingId);
+    ServiceResponse createOrder(String orderMessageStr);
 
     ServiceResponse getOrderProduct(Integer userId);
 

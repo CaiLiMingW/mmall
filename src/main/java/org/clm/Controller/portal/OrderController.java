@@ -4,12 +4,14 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.demo.trade.config.Configs;
 import com.google.common.collect.Maps;
+import org.clm.Pojo.Order;
 import org.clm.Pojo.User;
 import org.clm.Service.IOrderService;
 import org.clm.Service.IUserService;
 import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
 
+import org.clm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.Service;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -40,6 +43,8 @@ public class OrderController {
     private IUserService iUserService;
     @Autowired
     private IOrderService iOrderService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
 
 
@@ -53,7 +58,17 @@ public class OrderController {
 
         User user = (User)request.getAttribute("user");
 
-        return iOrderService.createOrder(22,shippingId);
+        Map map = new HashMap();
+        map.put("userId",user.getId());
+        map.put("shippingId",shippingId);
+
+//        Order ordermessage = new Order();
+//        ordermessage.setUserId(user.getId());
+//        ordermessage.setShippingId(shippingId);
+        //将订单请求发送到消息队列
+        rabbitTemplate.convertAndSend(Const.Routingkey.ORDERMESSAGE, JsonUtil.objToString(map));
+        //return iOrderService.createOrder(22,shippingId);
+        return ServiceResponse.createBySuccess();
     }
 
     @RequestMapping("/get_order_cart_product.do")

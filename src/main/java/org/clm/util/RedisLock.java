@@ -24,27 +24,29 @@ public class RedisLock {
     private RedisTemplateUtil redisTemplateUtil;
 
     public boolean setLock(String key){
+
         boolean b = redisTemplateUtil.setNX(Const.objType.LOCK, key, System.currentTimeMillis() + TIMEOUT);
         if (b){
             boolean expire = redisTemplateUtil.expire(Const.objType.LOCK, key, TIMEOUT);
         }else {
             Long lockValue1 = redisTemplateUtil.get(Const.objType.LOCK, key);
-            //死锁
+            //一重检查:锁存在并且时间过期已失效,可以进入修改该锁
             if (lockValue1 != null && System.currentTimeMillis() > lockValue1){
-                log.info("\n========发现死锁{}=======",Thread.currentThread().getId());
+                log.info("\n========第一次检查:锁已失效,进入修改{}=======",Thread.currentThread().getId());
+                //重新设置锁时间 getset:原子性操作
                 Long lockValue2 = redisTemplateUtil.getset(Const.objType.LOCK, key, System.currentTimeMillis() + TIMEOUT);
 
-                //
-                if (lockValue2 != null || lockValue1.equals(lockValue2)){
+                //二重检查：getset前锁消失：null 该锁未被其他进程使用
+                if (lockValue2 == null || lockValue1.equals(lockValue2)){
                     redisTemplateUtil.expire(Const.objType.LOCK,key,TIMEOUT);
-                    log.info("\n========{}:重置生存时间=======",Thread.currentThread().getId());
+                    log.info("\n========{}第二次检查::重置锁时间并使用该锁=======",Thread.currentThread().getId());
                 }else {
-                    log.info("\n!=======lockValue1.equals(lockValue2)=======");
+                    log.info("\n=======没有获取分布式锁,被其他进程使用=======");
                     return false;
                 }
 
             }else {
-                log.info("\n=======System.currentTimeMillis() < lockValue1=======");
+                log.info("\n=======,锁未过期,被其他进程使用无权使用=======");
                 return false;
             }
 
