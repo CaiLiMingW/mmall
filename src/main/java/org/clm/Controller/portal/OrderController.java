@@ -8,6 +8,7 @@ import org.clm.Pojo.Order;
 import org.clm.Pojo.User;
 import org.clm.Service.IOrderService;
 import org.clm.Service.IUserService;
+import org.clm.VO.OrderVo;
 import org.clm.common.Const;
 import org.clm.common.ServiceResponse;
 
@@ -68,7 +69,7 @@ public class OrderController {
         //将订单请求发送到消息队列
         rabbitTemplate.convertAndSend(Const.Routingkey.ORDERMESSAGE, JsonUtil.objToString(map));
         //return iOrderService.createOrder(22,shippingId);
-        return ServiceResponse.createBySuccess();
+        return ServiceResponse.createBySuccess("排队中",new OrderVo());
     }
 
     @RequestMapping("/get_order_cart_product.do")
