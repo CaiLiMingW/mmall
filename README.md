@@ -1,7 +1,8 @@
 
-#基合Spring+SpringMVC+Mybatis框架,使用Maven工具构建本项目
-
-##工具
+基合Spring+SpringMVC+Mybatis框架,使用Maven工具构建本项目
+=
+工具
+=   
 -    JDK版本为7u80 64位
 -   Maven版本是3.0.5 
 -    mysql-server-5.7.73
@@ -9,8 +10,10 @@
 -    tomcat-8.5.34  
 -    redis 2.8.0  
 -    rabbitmq 3.6.15      
--    服务器:CentOS 7.3 64位
-##目前实现的功能:
+-    服务器:CentOS 7.3 64位  
+
+目前实现的功能:
+==
   * * *
  * 自定义拦截器校验用户登录信息及权限认证
  * cookie+redis实现session共享
