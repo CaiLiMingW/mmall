@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.util.HashMap;
 
 /**
  * @author Ccc
@@ -50,9 +52,7 @@ public class CookieUtil {
 
         //cookie,Name Value
         Cookie cookie = new Cookie(COOKIE_NAME,token);
-
        /* cookie.setDomain(".admin.clm.com");*//**跨域共享session,*/
-
        //设置在tomcat根目录,使用服务器所有应用都可获取该cookies
         cookie.setPath("/");
 

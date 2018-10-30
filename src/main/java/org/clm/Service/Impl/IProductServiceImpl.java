@@ -3,6 +3,7 @@ package org.clm.Service.Impl;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.clm.Dao.ProductMapper;
 import org.clm.Pojo.Product;
@@ -19,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sun.rmi.runtime.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * @author Ccc
@@ -114,12 +112,14 @@ public class IProductServiceImpl implements IProductService {
         if(pageInfo==null){
             boolean b = redisLock.setLock(Const.objType.PRODOCTLISTVO);
             if (b){
+                List linkedList = new LinkedList();
                 List<ProductListVo> productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword, orderBy);
                 pageInfo = new PageInfo(productListVos);
                 redisTemplateUtil.set(Const.objType.PRODOCTLISTVO,key,pageInfo);
                 redisLock.delLock(Const.objType.PRODOCTLISTVO);
             }else {
                 try {
+
                     //取锁失败,已有线程在执行该模块代码，休眠0.5秒后再从缓存中取信息
                     Thread.sleep(300);
                     for(int i=0;i <6 ; i++){
@@ -127,6 +127,7 @@ public class IProductServiceImpl implements IProductService {
                         Thread.sleep(150);
                         log.info("\n线程{}:循环{}次,",Thread.currentThread().getId(),i+1);
                     }
+
                     log.info("\n→→线程:{}取锁失败,休眠",Thread.currentThread().getId());
                     pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
                 } catch (InterruptedException e) {
@@ -146,18 +147,22 @@ public class IProductServiceImpl implements IProductService {
     }
 
     public static void main(String[] args) {
-        boolean loop = true;
-        int j = 5000;
-        for (Long i = System.currentTimeMillis();loop; i++) {
-            if (System.currentTimeMillis()-i>=5000){
-                System.out.println(j+=500);
-                log.info("\n线程{}:循环中{}毫秒,",Thread.currentThread().getId(),j+=50);
-                i = System.currentTimeMillis();
-                if (j==200){
-                    loop =false;
-                }
-                }
-            }
-        }
+        //编译时自动引入了StringBuilder,使用append()方法拼接字符串
+        String str1 = " "+"a"+"b"+"c"+"";
+        List list = Lists.newArrayList();
+        //StringBuilder线程不安全 StringBuffer线程安全
+        StringBuilder str2 = new StringBuilder();
+        str2.append("a").append("b").append("c");
+        System.out.println(str1);
+        System.out.println(str2);
+        String str3 = str2.toString();
+        System.out.println("unTrim:"+str1);
+        //trim()删除字符串两端空白符,若无修改返回原始对象
+        System.out.println("Trim:"+str1.trim());
+
+
+        System.out.println(str1.substring(1,4));
+
+    }
 
 }

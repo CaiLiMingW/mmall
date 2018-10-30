@@ -1,23 +1,27 @@
 
-项目初始化步骤
+#基合Spring+SpringMVC+Mybatis框架,使用Maven工具构建本项目
 
-1.安装nodejs环境,推荐使用v4.4.7
-    下载地址 : https://nodejs.org/download/release/v4.4.7/
-
-2.全局安装webpack v^1.15.0
-    命令: (sudo) npm install -g webpack@^1.15.0
-
-3.全局安装webpack-dev-server v^1.16.5
-    命令: (sudo) npm install -g webpack-dev-server@^1.16.5
-
-4.在慕课网上下载源码，解压缩
-
-5.在项目根目录执行npm初始化
-    命令: npm install (--registry=https://registry.npm.taobao.org)
-
-6.启动项目
-    开发模式: npm run dev (windows系统上为npm run dev_win)
-    生产模式: npm run dist (windows系统上为npm run dist_win)
-
-7.开发模式下预览项目
-    访问：http://localhost:8088/dist/view/index.html
+##工具
+-    JDK版本为7u80 64位
+-   Maven版本是3.0.5 
+-    mysql-server-5.7.73
+-    nginx-1.6.2.tar.gz  
+-    tomcat-8.5.34  
+-    redis 2.8.0  
+-    rabbitmq 3.6.15      
+-    服务器:CentOS 7.3 64位
+##目前实现的功能:
+  * * *
+ * 自定义拦截器校验用户登录信息及权限认证
+ * cookie+redis实现session共享
+ * 用rabbitmq处理订单消息
+ * nginx均衡负载,实现tomcat集群
+ * 使用redis分布式锁实现分布调度定时关单任务
+ * 
+ * 使用Spring security 定时关闭未支付订单,定时删除已完成订单
+ * 使用Filter自动重置用户用户登录有效时间
+ * 使用redis缓存商品列表
+ * 等等
+ 
+* * *
+[线上地址](http://120.78.128.136/) 
