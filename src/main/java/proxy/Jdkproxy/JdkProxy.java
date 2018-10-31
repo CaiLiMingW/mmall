@@ -44,7 +44,6 @@ public class JdkProxy implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         //前执行
         aspect.before();
-        ArrayList
         //执行目标类的方法
         //利用反射,动态执行方法
         Object invoke = method.invoke(object, args);
