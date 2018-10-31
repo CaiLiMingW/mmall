@@ -3,6 +3,8 @@ package org.clm.util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +16,7 @@ import java.util.HashMap;
  * @author Ccc
  * @date 2018/10/10 0010 上午 10:28
  */
+@Component
 public class CookieUtil {
     private static  final Logger log = LoggerFactory.getLogger(CookieUtil.class);
 

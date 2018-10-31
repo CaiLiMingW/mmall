@@ -4,5 +4,3 @@
 npm-debug.log
 .idea/workspace.xml
 target/
-/src/main/java/proxy/inteface/
-/src/main/java/proxy/
