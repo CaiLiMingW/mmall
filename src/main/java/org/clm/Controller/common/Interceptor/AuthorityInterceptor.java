@@ -22,6 +22,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -48,20 +49,29 @@ public class AuthorityInterceptor implements HandlerInterceptor {
         //MethodParameter[] methodParameters = handlerMethod.getMethodParameters();
         //MethodParameter returnType = handlerMethod.getReturnType();
 
-        String sessionId = CookieUtil.readLoginToken(request);
-        User user = null;
-        if (StringUtils.isBlank(sessionId)){
-            this.forward(request,response,methodName);
-            return false;
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
+        if (session==null || user==null){
+            //从cookie获取sessionId
+            String sessionId = CookieUtil.readLoginToken(request);
+            //sessionId为空,跳转到登录页面
+            if (StringUtils.isBlank(sessionId)){
+                this.forward(request,response,methodName);
+                return false;
+            }
+            user = redisTemplateUtil.get(Const.objType.SESSION, sessionId);
+            //缓存中不存在用户,跳转到登录页面
+            if (user==null){
+                this.forward(request, response,methodName);
+                return false;
+            }
+            session.setAttribute("user",user);
         }
-        user = redisTemplateUtil.get(Const.objType.SESSION, sessionId);
-        if (user==null){
-            this.forward(request, response,methodName);
-            return false;
-        }
+
         // manage*
         //需要管理员权限的业务:方法前缀为manage
-        String manage;
+        String manage ;
         if (methodName.length()>=6){
             manage = methodName.substring(0, 6);
         }else {
@@ -71,24 +81,20 @@ public class AuthorityInterceptor implements HandlerInterceptor {
         if (StringUtils.equals(manage,"manage")){
             if (user.getRole().intValue()== Const.Role.ROLE_ADMIN){
                 return true;
+            }else {
+                request.getRequestDispatcher("/noAdminRole").forward(request,response);
+                return false;
             }
-            request.setAttribute("user",user);
-            request.getRequestDispatcher("/noAdminRole").forward(request,response);
-            return true;
         }
-
-        request.setAttribute("user",user);
         return true;
-
-
     }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handle, ModelAndView modelAndView) throws Exception {
 
         try {
-            String sessionId = CookieUtil.readLoginToken(request);
-            if (StringUtils.isNotBlank(sessionId)){
+            String sessionId = request.getSession().getId();
+            if (StringUtils.isNotBlank(request.getSession().getId())){
                 User user = redisTemplateUtil.get(Const.objType.SESSION,sessionId);
                 if (user!=null){
                     redisTemplateUtil.expire(Const.objType.SESSION,sessionId, Const.RedisCacheExtime.REDIS_SESSION_EXTIME);

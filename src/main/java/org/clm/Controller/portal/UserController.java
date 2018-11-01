@@ -52,6 +52,7 @@ public class UserController {
             User user = response.getData();
             CookieUtil.writeLoginToken(responseCookie,session.getId());
             redisTemplateUtil.setEx(Const.objType.SESSION,session.getId(),user,Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+            session.setAttribute("user",user);
             //密码清空
             user.setPassword(StringUtils.EMPTY);
             user.setQuestion(StringUtils.EMPTY);
@@ -102,7 +103,7 @@ public class UserController {
      */
     @RequestMapping(value ="/get_user_info.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> getUserInfo(HttpServletRequest request){
-        User user = (User) request.getAttribute("user");
+        User user = (User) request.getSession().getAttribute("user");
         user.setPassword(StringUtils.EMPTY);
         return ServiceResponse.createBySucces(user);
     }
@@ -139,13 +140,13 @@ public class UserController {
     @RequestMapping(value ="/reset_password.do" ,method =RequestMethod.POST )
     public ServiceResponse resetPassword(String passwordOld,String passwordNew,HttpServletRequest request){
         String seesionId = CookieUtil.readLoginToken(request);
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iUserService.restPassword(passwordOld,passwordNew,user,seesionId);
     }
 
     @RequestMapping(value ="/update_information.do" ,method =RequestMethod.POST )
     public ServiceResponse updateInfomation(HttpServletRequest request,User updateuser){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         updateuser.setId(user.getId());
         updateuser.setUsername(user.getUsername());
         String sessionId = CookieUtil.readLoginToken(request);
@@ -158,7 +159,7 @@ public class UserController {
 
     @RequestMapping(value ="/get_information.do" ,method =RequestMethod.POST )
     public ServiceResponse<User> getInfomation(HttpServletRequest request){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return ServiceResponse.createBySucces(user);
     }
 

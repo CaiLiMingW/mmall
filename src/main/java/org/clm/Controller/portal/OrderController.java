@@ -60,8 +60,7 @@ public class OrderController {
     @RequestMapping("/create.do")
     public ServiceResponse createOrder(HttpServletRequest request,Integer shippingId){
 
-        User user = (User)request.getAttribute("user");
-
+        User user = (User)request.getSession().getAttribute("user");
         Map map = new HashMap();
         map.put("userId",user.getId());
         map.put("shippingId",shippingId);
@@ -97,7 +96,7 @@ public class OrderController {
 
     @RequestMapping("/get_order_cart_product.do")
     public ServiceResponse getOrderCartProduct(HttpServletRequest request){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iOrderService.getOrderProduct(user.getId());
     }
 
@@ -105,20 +104,20 @@ public class OrderController {
     public ServiceResponse getOrderList(HttpServletRequest request,
                                         @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                         @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iOrderService.getOrderListByUserId(user.getId(),pageNum,pageSize);
     }
 
 
     @RequestMapping("/detail.do")
     public ServiceResponse getOrderDeatil(HttpServletRequest request,Long orderNo){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iOrderService.getOrderDeatilByOrderNo(user.getId(),orderNo);
     }
 
     @RequestMapping("/cancel.do")
     public ServiceResponse cancelOrder(HttpServletRequest request,Long orderNo){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iOrderService.cancelOrderByOrderNo(user.getId(),orderNo);
     }
 
@@ -133,7 +132,7 @@ public class OrderController {
 
     @RequestMapping("/pay.do")
     public ServiceResponse pay(Long orderNo, HttpServletRequest request){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         String path = request.getSession().getServletContext().getRealPath("upload");
         return iOrderService.pay(orderNo,user.getId(),path);
     }
@@ -149,7 +148,7 @@ public class OrderController {
 
     @RequestMapping("/query_order_pay_status.do")
     public ServiceResponse queryOrderPayStatus(HttpServletRequest request , Long orderNo){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iOrderService.getOrderPayStatus(orderNo);
     }
 }

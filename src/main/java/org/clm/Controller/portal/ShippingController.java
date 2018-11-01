@@ -27,27 +27,27 @@ public class ShippingController {
     @RequestMapping("/add.do")
     public ServiceResponse addShipping(HttpServletRequest request, Shipping shipping){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iShippingService.addShipping(user,shipping);
     }
 
     @RequestMapping("/del.do")
     public ServiceResponse delShipping(HttpServletRequest request, Integer shippingId){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
             return iShippingService.deleteShipping(user,shippingId);
     }
 
     @RequestMapping("/update.do")
     public ServiceResponse updateShipping(HttpServletRequest request, Shipping shipping){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iShippingService.updateShipping(user,shipping);
     }
 
     @RequestMapping("/select.do")
     public ServiceResponse selectShipping(HttpServletRequest request, Integer shippingId){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iShippingService.selectShipping(user,shippingId);
 
     }
@@ -56,7 +56,7 @@ public class ShippingController {
     public ServiceResponse getShippingList(HttpServletRequest request,
                                            @RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum,
                                            @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iShippingService.getShippingList(user,pageNum,pageSize);
 
     }

@@ -3,6 +3,10 @@ package org.clm.util;
 import org.springframework.util.StringUtils;
 
 import java.security.MessageDigest;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by geely
@@ -59,4 +63,20 @@ public class MD5Util {
     private static final String hexDigits[] = {"0", "1", "2", "3", "4", "5",
             "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
 
+    public static void main(String[] args) {
+        HashMap<String,String> map = new HashMap();
+        map.put("key","value");
+        for (Object o : map.keySet()) {
+            System.out.println(o);
+        }
+        for (Object value : map.values()) {
+            System.out.println(value);
+        }
+        for (Map.Entry o1 : map.entrySet()) {
+            System.out.println( o1.getKey());
+            System.out.println(o1.getValue());
+        }
+        Set set = map.entrySet();
+        System.out.println(map.get("xx"));
+    }
 }

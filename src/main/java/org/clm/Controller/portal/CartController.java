@@ -29,41 +29,41 @@ public class CartController {
 
     @RequestMapping("/add.do")
     public ServiceResponse add(HttpServletRequest request, Integer productId, Integer count){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iCartService.addCartProduct(user,productId,count);
 
     }
 
     @RequestMapping("/update.do")
     public ServiceResponse updateCart(HttpServletRequest request,Integer productId,Integer count){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iCartService.updateCart(user,productId,count);
     }
 
     @RequestMapping("/delete_product.do")
     public ServiceResponse deleteProductCart(HttpServletRequest request,String productIds){
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
             return iCartService.deleteCartProduct(user,productIds);
     }
 
     @RequestMapping("/list.do")
     public ServiceResponse getCartList(HttpServletRequest request){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iCartService.getCartProductList(user);
     }
 
     @RequestMapping("/select_all.do")
     public ServiceResponse chooseAll(HttpServletRequest request){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iCartService.updateCheck(user, Const.Cart.CHECKED,null);
     }
 
     @RequestMapping("/un_select_all.do")
     public ServiceResponse unchooseAll(HttpServletRequest request){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iCartService.updateCheck(user, Const.Cart.UN_CHECKED,null);
 
     }
@@ -71,21 +71,21 @@ public class CartController {
     @RequestMapping("/un_select.do")
     public ServiceResponse unChooseOne(HttpServletRequest request,Integer productId){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
             return iCartService.updateCheck(user, Const.Cart.UN_CHECKED,productId);
     }
 
     @RequestMapping("/select.do")
     public ServiceResponse ChooseOne(HttpServletRequest request,Integer productId){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
             return iCartService.updateCheck(user, Const.Cart.CHECKED,productId);
     }
 
     @RequestMapping("/get_cart_product_count.do")
     public ServiceResponse getCartProductcount(HttpServletRequest request){
 
-        User user = (User)request.getAttribute("user");
+        User user = (User)request.getSession().getAttribute("user");
         return iCartService.selectCartProductCount(user);
 
     }
