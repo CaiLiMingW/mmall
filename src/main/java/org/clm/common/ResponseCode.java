@@ -1,5 +1,7 @@
 package org.clm.common;
 
+import java.util.Stack;
+
 /** 枚举类
  * @author Ccc
  * @date 2018/9/27 0027 上午 8:47
@@ -12,7 +14,6 @@ public enum ResponseCode {
     ;
     private final int code;
     private final String desc;
-
 
     ResponseCode(int code, String desc) {
         this.code = code;

@@ -22,11 +22,10 @@
  * cookie+redis实现session共享
  * 使用Filter自动重置用户用户登录有效时间
  * nginx均衡负载,实现tomcat集群
- * 使用redis分布式锁实现分布调度定时关单任务
- * 支付宝沙箱环境模拟简单的扫码支付
- * 使用Spring security 定时关闭未支付订单,定时删除已完成订单
- * 使用redis缓存商品列表
- * 用rabbitmq处理订单消息
+ * 简单使用redis分布式锁实现分布调度定时关单任务
+ * 简单使用Spring security 定时关闭未支付订单,定时删除已完成订单
+ * 简单使用redis缓存商品列表
+ * 简单使用rabbitmq处理订单消息
  * 等等... 
 * * *
 [线上地址](http://120.78.128.136/) 

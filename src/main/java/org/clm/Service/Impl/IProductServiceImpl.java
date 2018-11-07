@@ -45,7 +45,11 @@ public class IProductServiceImpl implements IProductService {
             return ServiceResponse.createByErrorMessage("产品ID错误");
         }
         //从缓存获取product
-        Product product = redisTemplateUtil.get(Const.objType.PRODUCT,""+productId);
+        Object obj = redisTemplateUtil.get(Const.objType.PRODUCT, "" + productId);
+        if (StringUtils.equals("noExits", (CharSequence) obj)){
+            return ServiceResponse.createByErrorMessage("该商品已下架或删除");
+        }
+        Product product = (Product) obj ;
 
         //若为Null，从数据库取最新数据,并更新到缓存中
         if (product==null){
@@ -60,29 +64,17 @@ public class IProductServiceImpl implements IProductService {
                 log.info("\n→→线程:{},锁状态,进入休眠",Thread.currentThread().getId());
                 //todo 定时任务修改 thread.sleep?
                 try {
-                    boolean loop = true;
-                    for (Long i = System.currentTimeMillis();loop; i++) {
-                        if (System.currentTimeMillis()-i>=50){
-                            int j = 50;
-                            log.info("\n线程{}:循环中{}毫秒,",Thread.currentThread().getId(),j+=50);
-                            i = System.currentTimeMillis();
-                            if(!redisTemplateUtil.haskey(Const.objType.LOCK,Const.objType.PRODUCT)){
-                                product = redisTemplateUtil.get(Const.objType.PRODUCT,""+productId);
-                                if(product!=null){
-                                    loop = false;
-                                }
-                            }
-                        }
-                    }
+                    log.info("\n线程{}:循环中{}毫秒,",Thread.currentThread().getId());
                     //取锁失败,已有线程在执行该模块代码，休眠0.5秒后再从缓存中取信息
-//                    Thread.sleep(300);
-//                    for(int i=0;i <6 ; i++){
-//
-//                        Thread.sleep(150);
-//                        log.info("\n线程{}:循环{}次,",Thread.currentThread().getId(),i++);
-//                    }
-                    product = productMapper.selectByPrimaryKey(productId);
-                    redisTemplateUtil.set(Const.objType.PRODUCT,""+productId,product);
+                    for(int i=0;i <6 && product!=null ; i++){
+                        Thread.sleep(150);
+                        Object obj2 = redisTemplateUtil.get(Const.objType.PRODUCT, "" + productId);
+                        if (StringUtils.equals("noExits", (CharSequence) obj)){
+                            return ServiceResponse.createByErrorMessage("该商品已下架或删除");
+                        }
+                        product = (Product) obj2 ;
+                        log.info("\n线程{}:循环{}次,",Thread.currentThread().getId(),i++);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     log.error("线程休眠出错:{}",e);
@@ -106,30 +98,36 @@ public class IProductServiceImpl implements IProductService {
             orderBy = StringUtils.equals("price_desc",orderBy)?Const.OrderBy.PRICE_DESC:Const.OrderBy.PRICE_ASC;
         }
         key = "" + (categoryId==null?"search":categoryId) + pageNum + pageSize + keyword+orderBy;
-        pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
 
+        Object obj = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
+        if (StringUtils.equals("noExits", (CharSequence) obj)){
+            return ServiceResponse.createByErrorMessage("参数错误");
+        }
+        pageInfo = (PageInfo) obj ;
 
         if(pageInfo==null){
             boolean b = redisLock.setLock(Const.objType.PRODOCTLISTVO);
             if (b){
-                List linkedList = new LinkedList();
                 List<ProductListVo> productListVos = productMapper.selectProductBycategoryIdAndKeywordOrdeBy(categoryId, keyword, orderBy);
-                pageInfo = new PageInfo(productListVos);
+                if (productListVos.size()==0){
+                    pageInfo = null;
+                }else {
+                    pageInfo = new PageInfo(productListVos);
+                }
                 redisTemplateUtil.set(Const.objType.PRODOCTLISTVO,key,pageInfo);
                 redisLock.delLock(Const.objType.PRODOCTLISTVO);
             }else {
                 try {
-
                     //取锁失败,已有线程在执行该模块代码，休眠0.5秒后再从缓存中取信息
-                    Thread.sleep(300);
-                    for(int i=0;i <6 ; i++){
-                        pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
+                    for(int i = 0;i <6 && pageInfo!=null ; i++){
+                        Object obj2 = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
+                        if (StringUtils.equals("noExits", (CharSequence) obj)){
+                            return ServiceResponse.createByErrorMessage("参数错误");
+                        }
+                        pageInfo = (PageInfo) obj2 ;
                         Thread.sleep(150);
                         log.info("\n线程{}:循环{}次,",Thread.currentThread().getId(),i+1);
                     }
-
-                    log.info("\n→→线程:{}取锁失败,休眠",Thread.currentThread().getId());
-                    pageInfo = redisTemplateUtil.get(Const.objType.PRODOCTLISTVO,key);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     log.error("线程休眠出错:{}",e);

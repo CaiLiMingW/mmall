@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import sun.rmi.runtime.Log;
 
 import java.sql.Time;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Ccc
@@ -27,6 +30,8 @@ public class RedisLock {
 
         boolean b = redisTemplateUtil.setNX(Const.objType.LOCK, key, System.currentTimeMillis() + TIMEOUT);
         if (b){
+            Lock lock;
+            ReentrantLock reentrantLock;
             boolean expire = redisTemplateUtil.expire(Const.objType.LOCK, key, TIMEOUT);
         }else {
             Long lockValue1 = redisTemplateUtil.get(Const.objType.LOCK, key);

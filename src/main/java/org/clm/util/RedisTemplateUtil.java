@@ -1,7 +1,11 @@
 package org.clm.util;
 
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
+import org.clm.Pojo.Product;
 import org.clm.VO.ProductListVo;
+import org.clm.common.Const;
+import org.clm.common.ServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +83,14 @@ public class RedisTemplateUtil {
     public <T> boolean set(String objType, String key,T obj){
         key = objType+""+key;
         try {
+            if (obj!=null){
+                redisTemplate.opsForValue().set(key,obj);
+            }else {
+                String value = "noExits";
+                //缓存雪崩,设置一个值,30秒后失效
+                redisTemplate.opsForValue().set(key,value,60,TimeUnit.SECONDS);
+            }
             /*value = JsonUtil.objToString(obj);*/
-            redisTemplate.opsForValue().set(key,obj);
             return true;
         }catch (Exception e){
             log.info("\n=========set:errer==========\n{}\n",e);
