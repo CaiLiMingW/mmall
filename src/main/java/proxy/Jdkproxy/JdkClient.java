@@ -22,7 +22,9 @@ public class JdkClient {
         HashMap map = new HashMap();
         map.put("xx","xxx");
         System.out.println(map.get("xx"));
+
         String s = "1";
+
         Integer ss = Integer.valueOf(s);
 
         //ClassLoder 当前类加载器,将其加载到内存

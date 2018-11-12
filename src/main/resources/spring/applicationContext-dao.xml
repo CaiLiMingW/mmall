@@ -34,7 +34,7 @@
         <property name="dataSource" ref="dataSource"/>
         <!-- 扫描java bean，自动使用别名 -->
 		<property name="typeAliasesPackage" value="org.clm.Pojo"/>
-		<!-- 指定mybatis，mapper文件的位置 -->
+		<!-- 扫描指映射文件 -->
 		<property name="mapperLocations" value="classpath:mappers/*.xml"/>
 	</bean>
 
